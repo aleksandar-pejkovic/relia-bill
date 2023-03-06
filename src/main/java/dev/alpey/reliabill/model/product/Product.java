@@ -1,15 +1,18 @@
-package dev.alpey.reliabill.model;
+package dev.alpey.reliabill.model.product;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
-import dev.alpey.reliabill.enums.PermissionName;
+import dev.alpey.reliabill.enums.TaxRate;
+import dev.alpey.reliabill.model.document.Item;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,21 +21,33 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "permissions")
+@Table(name = "products")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Permission {
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private PermissionName name;
+    private String plu;
 
-    @ManyToMany(mappedBy = "permissions")
-    private Set<Role> roles;
+    private String name;
+
+    private String unit;
+
+    private String description;
+
+    private BigDecimal priceBeforeTax;
+
+    @Enumerated(EnumType.STRING)
+    private TaxRate taxRate;
+
+    private BigDecimal price;
+
+    @OneToMany(mappedBy = "product")
+    private Set<Item> items = new HashSet<>();
 }

@@ -1,11 +1,12 @@
-package dev.alpey.reliabill.model;
+package dev.alpey.reliabill.model.user;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
-import dev.alpey.reliabill.util.converter.DateConverter;
+import dev.alpey.reliabill.model.customer.Customer;
+import dev.alpey.reliabill.model.customer.UserCompany;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,9 +14,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,9 +41,7 @@ public class User {
 
     private String password;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Convert(converter = DateConverter.class)
-    private Date creationDate;
+    private LocalDate creationDate;
 
     @ManyToMany
     @JoinTable(
@@ -51,5 +50,11 @@ public class User {
                     name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(
                     name = "role_id", referencedColumnName = "id"))
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
+
+    @OneToOne(mappedBy = "user")
+    private UserCompany userCompany;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Customer> customers = new HashSet<>();
 }

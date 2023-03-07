@@ -33,7 +33,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String plu;
+    private Integer plu;
 
     private String name;
 

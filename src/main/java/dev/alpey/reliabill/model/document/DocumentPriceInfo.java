@@ -55,7 +55,7 @@ public class DocumentPriceInfo {
 
     private void calculatePriceInfoForRate10(Set<Item> allItems) {
         Set<Item> items = allItems.stream()
-                .filter(item -> item.getItemPriceInfo().getTaxRate().equals(TaxRate.RATE_10))
+                .filter(item -> item.getProduct().getTaxRate().equals(TaxRate.RATE_10))
                 .collect(Collectors.toSet());
 
         this.taxRate10total = items.stream()

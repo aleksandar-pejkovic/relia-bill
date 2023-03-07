@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DocumentPriceInfo {
+public class DocumentPriceDetails {
 
     private BigDecimal total;
 
@@ -34,14 +34,10 @@ public class DocumentPriceInfo {
 
     private BigDecimal taxRate10subtotal;
 
-    public DocumentPriceInfo(Set<Item> items) {
-        this.total = items.stream()
-                .map(item -> item.getItemPriceInfo().getTotal())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    public DocumentPriceDetails(Set<Item> items) {
+        this.total = calculateTotal(items);
 
-        this.tax = items.stream()
-                .map(item -> item.getItemPriceInfo().getTax())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.tax = calculateTax(items);
 
         this.subtotal = this.total.subtract(this.tax);
 
@@ -55,16 +51,12 @@ public class DocumentPriceInfo {
 
     private void calculatePriceInfoForRate10(Set<Item> allItems) {
         Set<Item> items = allItems.stream()
-                .filter(item -> item.getProduct().getTaxRate().equals(TaxRate.RATE_10))
+                .filter(item -> item.getProduct().getProductDetails().getTaxRate().equals(TaxRate.RATE_10))
                 .collect(Collectors.toSet());
 
-        this.taxRate10total = items.stream()
-                .map(item -> item.getItemPriceInfo().getTotal())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.taxRate10total = calculateTotal(items);
 
-        this.taxRate10tax = items.stream()
-                .map(item -> item.getItemPriceInfo().getTax())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.taxRate10tax = calculateTax(items);
 
         this.taxRate10subtotal = this.taxRate10total.subtract(this.taxRate10tax);
     }
@@ -73,5 +65,17 @@ public class DocumentPriceInfo {
         this.taxRate20total = this.total.subtract(this.taxRate10total);
         this.taxRate20tax = this.tax.subtract(this.taxRate10tax);
         this.taxRate20subtotal = this.subtotal.subtract(this.taxRate10subtotal);
+    }
+
+    private static BigDecimal calculateTotal(Set<Item> items) {
+        return items.stream()
+                .map(item -> item.getItemPriceDetails().getTotal())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private static BigDecimal calculateTax(Set<Item> items) {
+        return items.stream()
+                .map(item -> item.getItemPriceDetails().getTax())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

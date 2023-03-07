@@ -45,7 +45,7 @@ public class Document {
     private LocalDate dueDate;
 
     @Embedded
-    private DocumentPriceInfo documentPriceInfo;
+    private DocumentPriceDetails documentPriceDetails;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")

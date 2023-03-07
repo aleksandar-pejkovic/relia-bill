@@ -33,7 +33,7 @@ public class Customer {
     private Long id;
 
     @Embedded
-    private CompanyInfo companyInfo;
+    private CompanyDetails companyDetails;
 
     @Embedded
     private Address address;

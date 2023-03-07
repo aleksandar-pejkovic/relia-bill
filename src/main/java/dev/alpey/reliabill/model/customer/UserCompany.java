@@ -29,7 +29,7 @@ public class UserCompany {
     private Long id;
 
     @Embedded
-    private CompanyInfo companyInfo;
+    private CompanyDetails companyDetails;
 
     @Embedded
     private Address address;

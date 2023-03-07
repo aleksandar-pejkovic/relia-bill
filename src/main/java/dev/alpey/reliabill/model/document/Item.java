@@ -33,7 +33,7 @@ public class Item {
     private BigDecimal quantity;
 
     @Embedded
-    private ItemPriceInfo itemPriceInfo;
+    private ItemPriceDetails itemPriceDetails;
 
     @ManyToOne
     @JoinColumn(name = "product_id")

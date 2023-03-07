@@ -6,7 +6,6 @@ import java.util.Set;
 
 import dev.alpey.reliabill.model.customer.Customer;
 import dev.alpey.reliabill.model.customer.UserCompany;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -36,7 +35,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    private String name;
+
     private String email;
 
     private String password;

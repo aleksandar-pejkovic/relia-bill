@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemPriceInfo {
+public class ItemPriceDetails {
 
     private BigDecimal total;
 
@@ -22,8 +22,8 @@ public class ItemPriceInfo {
 
     private BigDecimal subtotal;
 
-    public ItemPriceInfo(BigDecimal quantity, Product product, TaxRate taxRate) {
-        this.total = quantity.multiply(product.getPrice())
+    public ItemPriceDetails(BigDecimal quantity, Product product, TaxRate taxRate) {
+        this.total = quantity.multiply(product.getProductDetails().getPrice())
                 .setScale(2, RoundingMode.HALF_EVEN);
 
         this.tax = total.multiply(taxRate.getRate())

@@ -1,11 +1,11 @@
-package dev.alpey.reliabill.model.document;
+package dev.alpey.reliabill.model.invoice;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
 import dev.alpey.reliabill.enums.DocumentType;
 import dev.alpey.reliabill.model.customer.Customer;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,7 +29,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Document {
+public class Invoice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,13 +44,28 @@ public class Document {
 
     private LocalDate dueDate;
 
-    @Embedded
-    private DocumentPriceDetails documentPriceDetails;
+    private BigDecimal total;
+
+    private BigDecimal tax;
+
+    private BigDecimal subtotal;
+
+    private BigDecimal taxRate20total;
+
+    private BigDecimal taxRate20tax;
+
+    private BigDecimal taxRate20subtotal;
+
+    private BigDecimal taxRate10total;
+
+    private BigDecimal taxRate10tax;
+
+    private BigDecimal taxRate10subtotal;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @OneToMany(mappedBy = "document")
+    @OneToMany(mappedBy = "invoice")
     private Set<Item> items;
 }

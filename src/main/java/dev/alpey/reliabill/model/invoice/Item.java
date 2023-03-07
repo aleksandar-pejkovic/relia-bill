@@ -1,9 +1,8 @@
-package dev.alpey.reliabill.model.document;
+package dev.alpey.reliabill.model.invoice;
 
 import java.math.BigDecimal;
 
 import dev.alpey.reliabill.model.product.Product;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,8 +31,11 @@ public class Item {
 
     private BigDecimal quantity;
 
-    @Embedded
-    private ItemPriceDetails itemPriceDetails;
+    private BigDecimal total;
+
+    private BigDecimal tax;
+
+    private BigDecimal subtotal;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
@@ -41,5 +43,5 @@ public class Item {
 
     @ManyToOne
     @JoinColumn(name = "document_id")
-    private Document document;
+    private Invoice invoice;
 }

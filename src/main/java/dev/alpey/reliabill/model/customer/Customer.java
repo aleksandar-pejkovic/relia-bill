@@ -2,7 +2,7 @@ package dev.alpey.reliabill.model.customer;
 
 import java.util.Set;
 
-import dev.alpey.reliabill.model.document.Document;
+import dev.alpey.reliabill.model.invoice.Invoice;
 import dev.alpey.reliabill.model.user.User;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -46,5 +46,5 @@ public class Customer {
     private User user;
 
     @OneToMany(mappedBy = "customer")
-    private Set<Document> documents;
+    private Set<Invoice> invoices;
 }

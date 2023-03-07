@@ -1,4 +1,4 @@
-package dev.alpey.reliabill.service.item;
+package dev.alpey.reliabill.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

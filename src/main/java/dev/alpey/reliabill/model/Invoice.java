@@ -1,11 +1,10 @@
-package dev.alpey.reliabill.model.invoice;
+package dev.alpey.reliabill.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
 import dev.alpey.reliabill.enums.DocumentType;
-import dev.alpey.reliabill.model.customer.Customer;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

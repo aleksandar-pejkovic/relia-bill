@@ -1,11 +1,10 @@
-package dev.alpey.reliabill.model.product;
+package dev.alpey.reliabill.model;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
 import dev.alpey.reliabill.enums.TaxRate;
-import dev.alpey.reliabill.model.invoice.Item;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

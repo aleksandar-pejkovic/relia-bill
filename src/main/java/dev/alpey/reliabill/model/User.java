@@ -1,11 +1,9 @@
-package dev.alpey.reliabill.model.user;
+package dev.alpey.reliabill.model;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-import dev.alpey.reliabill.model.customer.Customer;
-import dev.alpey.reliabill.model.customer.UserCompany;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

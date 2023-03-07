@@ -1,12 +1,12 @@
-package dev.alpey.reliabill.service.invoice;
+package dev.alpey.reliabill.service;
 
 import java.math.BigDecimal;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import dev.alpey.reliabill.enums.TaxRate;
-import dev.alpey.reliabill.model.invoice.Invoice;
-import dev.alpey.reliabill.model.invoice.Item;
+import dev.alpey.reliabill.model.Invoice;
+import dev.alpey.reliabill.model.Item;
 
 public class InvoiceServiceImpl {
 

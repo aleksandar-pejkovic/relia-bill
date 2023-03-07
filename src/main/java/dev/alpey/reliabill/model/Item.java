@@ -1,8 +1,7 @@
-package dev.alpey.reliabill.model.invoice;
+package dev.alpey.reliabill.model;
 
 import java.math.BigDecimal;
 
-import dev.alpey.reliabill.model.product.Product;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

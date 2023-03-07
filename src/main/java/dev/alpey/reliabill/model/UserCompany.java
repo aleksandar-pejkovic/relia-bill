@@ -1,17 +1,11 @@
-package dev.alpey.reliabill.model.customer;
+package dev.alpey.reliabill.model;
 
-import java.util.Set;
-
-import dev.alpey.reliabill.model.invoice.Invoice;
-import dev.alpey.reliabill.model.user.User;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,31 +14,43 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "customers")
+@Table(name = "companies")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Customer {
+public class UserCompany {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Embedded
-    private CompanyDetails companyDetails;
+    private String name;
 
-    @Embedded
-    private Address address;
+    private String director;
 
-    @Embedded
-    private Contact contact;
+    private String registrationNumber;
 
-    @ManyToOne
+    private String taxNumber;
+
+    private String bankAccount;
+
+    private String street;
+
+    private String zip;
+
+    private String city;
+
+    private String phone;
+
+    private String email;
+
+    private String website;
+
+    private byte[] logo;
+
+    @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    @OneToMany(mappedBy = "customer")
-    private Set<Invoice> invoices;
 }

@@ -17,14 +17,12 @@ public final class InvoiceCalculator {
 
     public static void calculateAll(Invoice invoice) {
         calculateInitialValues(invoice);
+        calculateTaxDetailsForRate10(invoice);
+        calculateTaxDetailsForRate20(invoice);
         checkForOverpaidAmount(invoice);
-        calculateTaxDetailsPerTaxRate(invoice);
     }
 
     private static void calculateInitialValues(Invoice invoice) {
-        invoice.setPaidAmount(BigDecimal.ZERO);
-        invoice.setRemainingDebt(invoice.getTotal());
-        invoice.setInvoiceStatus(InvoiceStatus.PENDING);
         invoice.setTotal(calculateTotal(invoice.getItems()));
         invoice.setTax(calculateTax(invoice.getItems()));
         invoice.setSubtotal(invoice.getTotal().subtract(invoice.getTax()));
@@ -39,22 +37,17 @@ public final class InvoiceCalculator {
     private static void processOverpaid(Invoice invoice) {
         Customer customer = invoice.getCustomer();
         BigDecimal overpaidAmount = customer.getOverpaidAmount();
-        BigDecimal totalAmount = invoice.getTotal();
-        BigDecimal paidAmount = overpaidAmount.compareTo(totalAmount) >= 0
-                ? totalAmount
+        BigDecimal remainingDebt = invoice.getRemainingDebt();
+        BigDecimal paidAmount = overpaidAmount.compareTo(remainingDebt) >= 0
+                ? remainingDebt
                 : overpaidAmount;
 
         customer.setOverpaidAmount(overpaidAmount.subtract(paidAmount));
         invoice.setPaidAmount(paidAmount);
-        invoice.setRemainingDebt(totalAmount.subtract(paidAmount));
-        invoice.setInvoiceStatus(paidAmount.compareTo(totalAmount) == 0
+        invoice.setRemainingDebt(remainingDebt.subtract(paidAmount));
+        invoice.setInvoiceStatus(paidAmount.compareTo(remainingDebt) == 0
                 ? InvoiceStatus.PAID
                 : InvoiceStatus.PARTIALLY_PAID);
-    }
-
-    private static void calculateTaxDetailsPerTaxRate(Invoice invoice) {
-        calculateTaxDetailsForRate10(invoice);
-        calculateTaxDetailsForRate20(invoice);
     }
 
     private static void calculateTaxDetailsForRate10(Invoice invoice) {

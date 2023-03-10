@@ -2,9 +2,11 @@ package dev.alpey.reliabill.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 import dev.alpey.reliabill.enums.DocumentType;
+import dev.alpey.reliabill.enums.InvoiceStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -61,10 +63,20 @@ public class Invoice {
 
     private BigDecimal taxRate10subtotal;
 
+    private BigDecimal paidAmount;
+
+    private BigDecimal remainingDebt;
+
+    @Enumerated(EnumType.STRING)
+    private InvoiceStatus invoiceStatus;
+
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
     @OneToMany(mappedBy = "invoice")
-    private Set<Item> items;
+    private Set<Item> items = new HashSet<>();
+
+    @OneToMany(mappedBy = "invoice")
+    private Set<Payment> payments = new HashSet<>();
 }

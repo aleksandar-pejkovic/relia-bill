@@ -1,5 +1,7 @@
 package dev.alpey.reliabill.model;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Entity;
@@ -51,10 +53,15 @@ public class Customer {
 
     private String website;
 
+    private BigDecimal overpaidAmount;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "customer")
-    private Set<Invoice> invoices;
+    private Set<Invoice> invoices = new HashSet<>();
+
+    @OneToMany(mappedBy = "customer")
+    private Set<Payment> payments = new HashSet<>();
 }

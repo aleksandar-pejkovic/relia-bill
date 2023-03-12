@@ -7,7 +7,6 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import dev.alpey.reliabill.enums.InvoiceStatus;
 import dev.alpey.reliabill.model.Invoice;
 
 @Repository
@@ -15,11 +14,19 @@ public interface InvoiceRepository extends ListCrudRepository<Invoice, Long> {
 
     @Query("SELECT i "
             + "FROM Invoice i "
-            + "WHERE i.invoiceStatus <> :paidStatus "
-            + "AND i.customer.name = :customerName "
+            + "WHERE i.invoiceStatus <> 'PAID' "
+            + "AND i.company.name = :companyName "
             + "ORDER BY i.creationDate DESC")
     List<Invoice> findUnpaidInvoicesByCustomerNameOrderByCreationDateDesc(
-            @Param("paidStatus") InvoiceStatus paidStatus,
-            @Param("customerName") String customerName
+            @Param("companyName") String companyName
+    );
+
+    @Query("SELECT i "
+            + "FROM Invoice i "
+            + "WHERE i.invoiceStatus <> 'PAID' "
+            + "AND i.company.user.username = :username "
+            + "ORDER BY i.creationDate DESC")
+    List<Invoice> findUnpaidInvoicesOrderByCreationDateDesc(
+            @Param("username") String username
     );
 }

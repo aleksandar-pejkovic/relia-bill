@@ -1,19 +1,17 @@
 package dev.alpey.reliabill.enums;
 
-import java.math.BigDecimal;
-
 public enum TaxRate {
 
-    RATE_10(BigDecimal.valueOf(0.1)),
-    RATE_20(BigDecimal.valueOf(0.2));
+    RATE_10(0.1),
+    RATE_20(0.2);
 
-    private final BigDecimal rate;
+    private final Double rate;
 
-    TaxRate(BigDecimal rate) {
+    TaxRate(Double rate) {
         this.rate = rate;
     }
 
-    public BigDecimal getRate() {
+    public Double getRate() {
         return rate;
     }
 }

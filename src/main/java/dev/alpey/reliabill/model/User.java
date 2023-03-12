@@ -33,11 +33,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String username;
+
+    private String password;
 
     private String email;
 
-    private String password;
+    private String name;
 
     private LocalDate creationDate;
 
@@ -50,9 +52,12 @@ public class User {
                     name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles = new HashSet<>();
 
-    @OneToOne(mappedBy = "user")
-    private UserCompany userCompany;
+    @OneToOne
+    private Company ownCompany;
 
     @OneToMany(mappedBy = "user")
-    private Set<Customer> customers = new HashSet<>();
+    private Set<Company> companies = new HashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<Product> products = new HashSet<>();
 }

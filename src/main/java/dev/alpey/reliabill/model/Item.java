@@ -1,8 +1,9 @@
 package dev.alpey.reliabill.model;
 
-import java.math.BigDecimal;
-
+import dev.alpey.reliabill.enums.TaxRate;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,19 +29,18 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private BigDecimal quantity;
+    private String productName;
 
-    private BigDecimal total;
+    private Double quantity;
 
-    private BigDecimal tax;
+    private String unit;
 
-    private BigDecimal subtotal;
+    private Double price;
+
+    @Enumerated(EnumType.STRING)
+    private TaxRate taxRate;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
-
-    @ManyToOne
-    @JoinColumn(name = "document_id")
+    @JoinColumn(name = "invoice_id")
     private Invoice invoice;
 }

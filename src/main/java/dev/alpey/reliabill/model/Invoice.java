@@ -1,6 +1,5 @@
 package dev.alpey.reliabill.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "documents")
+@Table(name = "invoices")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -39,40 +38,18 @@ public class Invoice {
     @Enumerated(EnumType.STRING)
     private DocumentType documentType;
 
-    private String documentNumber;
+    private String invoiceNumber;
 
     private LocalDate creationDate;
 
     private LocalDate dueDate;
-
-    private BigDecimal total;
-
-    private BigDecimal tax;
-
-    private BigDecimal subtotal;
-
-    private BigDecimal taxRate20total;
-
-    private BigDecimal taxRate20tax;
-
-    private BigDecimal taxRate20subtotal;
-
-    private BigDecimal taxRate10total;
-
-    private BigDecimal taxRate10tax;
-
-    private BigDecimal taxRate10subtotal;
-
-    private BigDecimal paidAmount;
-
-    private BigDecimal remainingDebt;
 
     @Enumerated(EnumType.STRING)
     private InvoiceStatus invoiceStatus;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
-    private Customer customer;
+    private Company company;
 
     @OneToMany(mappedBy = "invoice")
     private Set<Item> items = new HashSet<>();

@@ -1,6 +1,5 @@
 package dev.alpey.reliabill.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
@@ -29,15 +28,15 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private BigDecimal amount;
-
     private LocalDateTime paymentDate;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    private Double amount;
 
     @ManyToOne
     @JoinColumn(name = "invoice_id")
     private Invoice invoice;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
 }

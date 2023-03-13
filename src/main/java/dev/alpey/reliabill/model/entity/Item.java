@@ -1,8 +1,9 @@
-package dev.alpey.reliabill.model;
+package dev.alpey.reliabill.model.entity;
 
-import java.time.LocalDateTime;
-
+import dev.alpey.reliabill.enums.TaxRate;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,27 +17,30 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "payments")
+@Table(name = "items")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Payment {
+public class Item {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime paymentDate;
+    private String productName;
 
-    private Double amount;
+    private Double quantity;
+
+    private String unit;
+
+    private Double price;
+
+    @Enumerated(EnumType.ORDINAL)
+    private TaxRate taxRate;
 
     @ManyToOne
     @JoinColumn(name = "invoice_id")
     private Invoice invoice;
-
-    @ManyToOne
-    @JoinColumn(name = "company_id")
-    private Company company;
 }

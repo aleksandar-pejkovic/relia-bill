@@ -8,7 +8,7 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import dev.alpey.reliabill.model.User;
+import dev.alpey.reliabill.model.entity.User;
 
 @Repository
 public interface UserRepository extends ListCrudRepository<User, Long> {

@@ -7,7 +7,7 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import dev.alpey.reliabill.model.Invoice;
+import dev.alpey.reliabill.model.entity.Invoice;
 
 @Repository
 public interface InvoiceRepository extends ListCrudRepository<Invoice, Long> {

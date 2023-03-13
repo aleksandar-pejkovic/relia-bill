@@ -1,4 +1,4 @@
-package dev.alpey.reliabill.model;
+package dev.alpey.reliabill.model.entity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "customers")
+@Table(name = "companies")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -51,8 +51,6 @@ public class Company {
     private String email;
 
     private String website;
-
-    private byte[] logo;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

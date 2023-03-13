@@ -1,4 +1,4 @@
-package dev.alpey.reliabill.dto;
+package dev.alpey.reliabill.model.dto;
 
 import dev.alpey.reliabill.configuration.validation.product.description.Description;
 import dev.alpey.reliabill.configuration.validation.product.name.ProductName;

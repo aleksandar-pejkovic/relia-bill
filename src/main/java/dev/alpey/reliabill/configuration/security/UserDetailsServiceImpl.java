@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.alpey.reliabill.model.Permission;
-import dev.alpey.reliabill.model.Role;
-import dev.alpey.reliabill.model.User;
+import dev.alpey.reliabill.model.entity.Permission;
+import dev.alpey.reliabill.model.entity.Role;
+import dev.alpey.reliabill.model.entity.User;
 import dev.alpey.reliabill.repository.UserRepository;
 
 @Service

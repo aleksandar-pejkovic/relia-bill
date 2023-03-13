@@ -1,4 +1,4 @@
-package dev.alpey.reliabill.model;
+package dev.alpey.reliabill.model.entity;
 
 import java.time.LocalDate;
 import java.util.HashSet;

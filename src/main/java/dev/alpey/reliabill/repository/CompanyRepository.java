@@ -3,7 +3,7 @@ package dev.alpey.reliabill.repository;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 
-import dev.alpey.reliabill.model.Company;
+import dev.alpey.reliabill.model.entity.Company;
 
 @Repository
 public interface CompanyRepository extends ListCrudRepository<Company, Long> {

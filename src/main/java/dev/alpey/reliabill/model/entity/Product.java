@@ -1,4 +1,4 @@
-package dev.alpey.reliabill.model;
+package dev.alpey.reliabill.model.entity;
 
 import dev.alpey.reliabill.enums.TaxRate;
 import jakarta.persistence.Entity;

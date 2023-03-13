@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.product.ProductNotFoundException;
-import dev.alpey.reliabill.dto.ProductDto;
-import dev.alpey.reliabill.model.Product;
+import dev.alpey.reliabill.model.dto.ProductDto;
+import dev.alpey.reliabill.model.entity.Product;
 import dev.alpey.reliabill.repository.ProductRepository;
 import dev.alpey.reliabill.repository.UserRepository;
 

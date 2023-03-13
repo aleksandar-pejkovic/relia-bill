@@ -14,9 +14,6 @@ public class DescriptionValidator implements ConstraintValidator<Description, St
 
     @Override
     public boolean isValid(String about, ConstraintValidatorContext context) {
-        if (about == null) {
-            return false;
-        }
         String regex = "^[a-zA-Z0-9ČĆŠĐŽčćšđž,\\.!\\? \\u0027-]+${1,300}";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(about);

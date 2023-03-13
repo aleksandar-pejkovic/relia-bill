@@ -17,8 +17,7 @@ public class NameValidator implements ConstraintValidator<Name, String> {
         if (name == null) {
             return false;
         }
-        String regex = "^[A-ZČĆŠĐŽ][a-zA-ZčćšđžČĆŠĐŽ]*[ \\u0027-]?"
-                + "[a-zA-ZčćšđžČĆŠĐŽ]*[a-zčćšđž0-9]{2,20}$";
+        String regex = "^[A-Z][a-zA-Z]*([ \\u002D][A-Z][a-zA-Z]*)*${2,50}";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(name);
         return matcher.find();

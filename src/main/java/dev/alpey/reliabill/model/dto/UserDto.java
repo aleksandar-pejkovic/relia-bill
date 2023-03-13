@@ -1,4 +1,4 @@
-package dev.alpey.reliabill.dto;
+package dev.alpey.reliabill.model.dto;
 
 import java.time.LocalDate;
 

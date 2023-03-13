@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.alpey.reliabill.configuration.exceptions.user.UserNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UsernameExistsException;
-import dev.alpey.reliabill.dto.UserDto;
 import dev.alpey.reliabill.enums.RoleName;
-import dev.alpey.reliabill.model.Role;
-import dev.alpey.reliabill.model.User;
+import dev.alpey.reliabill.model.dto.UserDto;
+import dev.alpey.reliabill.model.entity.Role;
+import dev.alpey.reliabill.model.entity.User;
 import dev.alpey.reliabill.repository.RoleRepository;
 import dev.alpey.reliabill.repository.UserRepository;
 

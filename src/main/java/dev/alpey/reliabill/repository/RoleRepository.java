@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import dev.alpey.reliabill.enums.RoleName;
-import dev.alpey.reliabill.model.Role;
+import dev.alpey.reliabill.model.entity.Role;
 
 @Repository
 public interface RoleRepository extends ListCrudRepository<Role, Long> {

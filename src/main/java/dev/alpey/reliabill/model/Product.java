@@ -37,7 +37,7 @@ public class Product {
 
     private String description;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private TaxRate taxRate;
 
     private Double price;

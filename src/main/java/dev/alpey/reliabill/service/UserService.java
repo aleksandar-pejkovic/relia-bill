@@ -66,7 +66,7 @@ public class UserService {
     public UserDto updateUser(UserDto userDto) {
         Optional<User> optionalUser = userRepository.findByUsername(userDto.getUsername());
         if (optionalUser.isEmpty()) {
-            throw new UsernameNotFoundException("Username '" + userDto.getUsername() + "' not found!");
+            throw new UserNotFoundException("User not found!");
         }
         User currentUser = optionalUser.get();
         userDto.setPassword(null);
@@ -78,7 +78,7 @@ public class UserService {
     public UserDto grantAdminRoleToUser(String username) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isEmpty()) {
-            throw new UsernameNotFoundException("Username '" + username + "' not found!");
+            throw new UserNotFoundException("User not found!");
         }
         User currentUser = optionalUser.get();
         currentUser.getRoles().add(roleRepository.findByName(RoleName.ADMIN));
@@ -89,7 +89,7 @@ public class UserService {
     public void deleteUser(String username) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isEmpty()) {
-            throw new UsernameNotFoundException("Username '" + username + "' not found!");
+            throw new UserNotFoundException("User not found!");
         }
         User currentUser = optionalUser.get();
         userRepository.delete(currentUser);

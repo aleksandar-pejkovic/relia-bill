@@ -2,16 +2,17 @@ package dev.alpey.reliabill.enums;
 
 public enum TaxRate {
 
-    RATE_10(0.1),
-    RATE_20(0.2);
+    RATE_0(0),
+    RATE_10(10),
+    RATE_20(20);
 
-    private final Double rate;
+    private final Integer rate;
 
-    TaxRate(Double rate) {
+    TaxRate(Integer rate) {
         this.rate = rate;
     }
 
-    public Double getRate() {
+    public Integer getRate() {
         return rate;
     }
 }

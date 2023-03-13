@@ -7,6 +7,8 @@ import jakarta.validation.ConstraintValidatorContext;
 
 public class PriceValidator implements ConstraintValidator<Price, Double> {
 
+    private static final int ALLOWED_DECIMAL_SCALE = 2;
+
     @Override
     public void initialize(Price constraintAnnotation) {
     }
@@ -14,6 +16,6 @@ public class PriceValidator implements ConstraintValidator<Price, Double> {
     @Override
     public boolean isValid(Double price, ConstraintValidatorContext constraintValidatorContext) {
         BigDecimal decPrice = BigDecimal.valueOf(price);
-        return (price >= 0 && decPrice.scale() == 2);
+        return (price >= 0 && decPrice.scale() == ALLOWED_DECIMAL_SCALE);
     }
 }

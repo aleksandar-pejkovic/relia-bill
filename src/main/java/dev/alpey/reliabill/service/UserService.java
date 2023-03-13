@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.alpey.reliabill.configuration.exceptions.user.UserNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UsernameExistsException;
-import dev.alpey.reliabill.configuration.exceptions.user.UsernameNotFoundException;
 import dev.alpey.reliabill.dto.UserDto;
 import dev.alpey.reliabill.enums.RoleName;
 import dev.alpey.reliabill.model.Role;
@@ -56,7 +55,7 @@ public class UserService {
             throw new UsernameExistsException("Account with username '" + userDto.getUsername() + "' already exist");
         }
         userDto.setCreationDate(LocalDate.now());
-        User user = convertUserToEntity(userDto);
+        User user = modelMapper.map(userDto, User.class);
         encryptUserPassword(user);
         assignDefaultRoleToUser(user);
         User registeredUser = userRepository.save(user);
@@ -86,19 +85,18 @@ public class UserService {
         return convertUserToDto(adminUser);
     }
 
-    public void deleteUser(String username) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        if (optionalUser.isEmpty()) {
+    public void deleteUser(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+        } else {
             throw new UserNotFoundException("User not found!");
         }
-        User currentUser = optionalUser.get();
-        userRepository.delete(currentUser);
     }
 
     public List<UserDto> loadAllUsers() {
         List<User> users = userRepository.findAll();
         if (users.isEmpty()) {
-            throw new UserNotFoundException("There are no users in the database!");
+            throw new UserNotFoundException("Users not found!");
         }
         return convertUsersToDtoList(users);
     }
@@ -106,7 +104,7 @@ public class UserService {
     public List<UserDto> loadAdmins() {
         List<User> users = userRepository.findAdmins();
         if (users.isEmpty()) {
-            throw new UserNotFoundException("There are no admins in the database!");
+            throw new UserNotFoundException("Admins not found!");
         }
         return convertUsersToDtoList(users);
     }
@@ -115,7 +113,7 @@ public class UserService {
         return userRepository.findByUsername(username)
                 .map(this::convertUserToDto)
                 .orElseThrow(
-                        () -> new UsernameNotFoundException(String.format("Username '%s' not found!", username))
+                        () -> new UserNotFoundException("User not found!")
                 );
     }
 
@@ -142,9 +140,5 @@ public class UserService {
 
     private UserDto convertUserToDto(User user) {
         return modelMapper.map(user, UserDto.class);
-    }
-
-    private User convertUserToEntity(UserDto userDto) {
-        return modelMapper.map(userDto, User.class);
     }
 }

@@ -11,7 +11,6 @@ import dev.alpey.reliabill.configuration.exceptions.user.EmailExistsException;
 import dev.alpey.reliabill.configuration.exceptions.user.EmailNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UserNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UsernameExistsException;
-import dev.alpey.reliabill.configuration.exceptions.user.UsernameNotFoundException;
 
 @RestControllerAdvice
 public class UserExceptionHandler {
@@ -19,12 +18,6 @@ public class UserExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(UsernameExistsException.class)
     public Map<String, String> handleUsernameExistsException(UsernameExistsException ex) {
-        return ErrorResponse.getErrorResponse(ex.getMessage());
-    }
-
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public Map<String, String> handleUsernameNotFoundException(UsernameNotFoundException ex) {
         return ErrorResponse.getErrorResponse(ex.getMessage());
     }
 

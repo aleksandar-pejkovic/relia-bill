@@ -57,7 +57,4 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private Set<Company> companies = new HashSet<>();
-
-    @OneToMany(mappedBy = "user")
-    private Set<Product> products = new HashSet<>();
 }

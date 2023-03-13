@@ -5,12 +5,14 @@ import jakarta.validation.ConstraintValidatorContext;
 
 public class UnitValidator implements ConstraintValidator<Unit, String> {
 
+    private static final int MAX_UNIT_LENGHT = 5;
+
     @Override
     public void initialize(Unit constraintAnnotation) {
     }
 
     @Override
     public boolean isValid(String unit, ConstraintValidatorContext constraintValidatorContext) {
-        return unit.length() <= 5;
+        return unit.length() <= MAX_UNIT_LENGHT;
     }
 }

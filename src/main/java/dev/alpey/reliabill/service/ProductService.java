@@ -27,8 +27,10 @@ public class ProductService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<ProductDto> search(String searchTerm) {
-        List<Product> results = productRepository.searchByName(searchTerm);
+    public List<ProductDto> searchProducts(String searchTerm, Principal principal) {
+        List<Product> results = productRepository.searchByName(searchTerm).stream()
+                .filter(product -> product.getUsername().equals(principal.getName()))
+                .collect(Collectors.toList());
         return convertProductsToDtoList(results);
     }
 

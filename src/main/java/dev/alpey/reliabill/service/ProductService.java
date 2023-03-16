@@ -28,10 +28,10 @@ public class ProductService {
     private ModelMapper modelMapper;
 
     public List<ProductDto> searchProducts(String searchTerm, Principal principal) {
-        List<Product> results = productRepository.searchByName(searchTerm).stream()
+        return productRepository.searchByName(searchTerm).stream()
                 .filter(product -> product.getUsername().equals(principal.getName()))
+                .map(this::convertProductToDto)
                 .collect(Collectors.toList());
-        return convertProductsToDtoList(results);
     }
 
     public ProductDto createProduct(ProductDto productDto, Principal principal) {

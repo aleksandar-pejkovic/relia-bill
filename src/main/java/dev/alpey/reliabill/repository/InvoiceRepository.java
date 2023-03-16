@@ -7,6 +7,7 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import dev.alpey.reliabill.model.entity.Company;
 import dev.alpey.reliabill.model.entity.Invoice;
 
 @Repository
@@ -29,4 +30,13 @@ public interface InvoiceRepository extends ListCrudRepository<Invoice, Long> {
     List<Invoice> findUnpaidInvoicesOrderByCreationDateDesc(
             @Param("username") String username
     );
+
+    @Query("SELECT i "
+            + "FROM Invoice i "
+            + "WHERE i.company.user.username = :username ")
+    List<Invoice> findByUsername(@Param("username") String username);
+
+    List<Invoice> findByCompany(Company company);
+
+    List<Invoice> searchByInvoiceNumber(String searchTerm);
 }

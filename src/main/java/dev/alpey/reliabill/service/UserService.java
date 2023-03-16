@@ -18,8 +18,10 @@ import dev.alpey.reliabill.configuration.exceptions.user.UserNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UsernameExistsException;
 import dev.alpey.reliabill.enums.RoleName;
 import dev.alpey.reliabill.model.dto.UserDto;
+import dev.alpey.reliabill.model.entity.Product;
 import dev.alpey.reliabill.model.entity.Role;
 import dev.alpey.reliabill.model.entity.User;
+import dev.alpey.reliabill.repository.ProductRepository;
 import dev.alpey.reliabill.repository.RoleRepository;
 import dev.alpey.reliabill.repository.UserRepository;
 
@@ -37,6 +39,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @Transactional(readOnly = true)
     public Set<UserDto> searchUsers(String searchTerm) {
@@ -86,11 +91,16 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-        } else {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
             throw new UserNotFoundException("User not found!");
         }
+        String username = optionalUser.get().getUsername();
+        List<Product> usersProducts = productRepository.findByUsername(username);
+        if (!usersProducts.isEmpty()) {
+            productRepository.deleteAll(usersProducts);
+        }
+        userRepository.deleteById(id);
     }
 
     public List<UserDto> loadAllUsers() {

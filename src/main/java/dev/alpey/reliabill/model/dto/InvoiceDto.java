@@ -32,4 +32,6 @@ public class InvoiceDto {
 
     @PaymentStatus
     private String invoiceStatus;
+
+    private Long companyId;
 }

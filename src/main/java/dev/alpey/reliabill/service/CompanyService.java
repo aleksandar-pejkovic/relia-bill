@@ -30,10 +30,10 @@ public class CompanyService {
     private ModelMapper modelMapper;
 
     public List<CompanyDto> searchCompanies(String searchTerm, Principal principal) {
-        List<Company> results = companyRepository.searchByName(searchTerm).stream()
+        return companyRepository.searchByName(searchTerm).stream()
                 .filter(company -> company.getUser().getUsername().equals(principal.getName()))
+                .map(this::convertCompanyToDto)
                 .collect(Collectors.toList());
-        return convertCompaniesToDtoList(results);
     }
 
     public CompanyDto createOwnCompany(CompanyDto companyDto, Principal principal) {

@@ -37,5 +37,5 @@ public class ItemDto {
     private Integer taxRate;
 
     @InvoiceNumber
-    private String invoiceNumber;
+    private Long invoiceId;
 }

@@ -8,6 +8,15 @@ public enum TaxRate {
 
     private final Integer rate;
 
+    public static TaxRate fromRate(int rate) {
+        for (TaxRate taxRate : TaxRate.values()) {
+            if (taxRate.getRate() == rate) {
+                return taxRate;
+            }
+        }
+        return null;
+    }
+
     TaxRate(Integer rate) {
         this.rate = rate;
     }

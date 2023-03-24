@@ -7,15 +7,15 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import dev.alpey.reliabill.model.entity.Item;
+import dev.alpey.reliabill.model.entity.Payment;
 
 @Repository
-public interface ItemRepository extends ListCrudRepository<Item, Long> {
+public interface PaymentRepository extends ListCrudRepository<Payment, Long> {
 
     @Query(
-            "SELECT i "
-                    + "FROM Item i "
-                    + "WHERE i.invoice.id = :invoiceId"
+            "SELECT p "
+                    + "FROM Payment p "
+                    + "WHERE p.invoice.id = :invoiceId"
     )
-    List<Item> findByInvoiceId(@Param("invoiceId") Long invoiceId);
+    List<Payment> findByInvoiceId(@Param("invoiceId") Long invoiceId);
 }

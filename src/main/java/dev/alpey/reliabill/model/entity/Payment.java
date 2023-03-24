@@ -35,8 +35,4 @@ public class Payment {
     @ManyToOne
     @JoinColumn(name = "invoice_id")
     private Invoice invoice;
-
-    @ManyToOne
-    @JoinColumn(name = "company_id")
-    private Company company;
 }

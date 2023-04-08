@@ -90,17 +90,16 @@ public class UserService {
         return convertUserToDto(adminUser);
     }
 
-    public void deleteUser(Long id) {
-        Optional<User> optionalUser = userRepository.findById(id);
+    public void deleteUser(String username) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isEmpty()) {
             throw new UserNotFoundException("User not found!");
         }
-        String username = optionalUser.get().getUsername();
         List<Product> usersProducts = productRepository.findByUsername(username);
         if (!usersProducts.isEmpty()) {
             productRepository.deleteAll(usersProducts);
         }
-        userRepository.deleteById(id);
+        userRepository.deleteById(optionalUser.get().getId());
     }
 
     public List<UserDto> loadAllUsers() {

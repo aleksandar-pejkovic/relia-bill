@@ -1,12 +1,13 @@
 package dev.alpey.reliabill.service;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.product.ProductNotFoundException;
@@ -27,16 +28,18 @@ public class ProductService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<ProductDto> searchProducts(String searchTerm, Principal principal) {
+    public List<ProductDto> searchProducts(String searchTerm) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return productRepository.searchByName(searchTerm).stream()
-                .filter(product -> product.getUsername().equals(principal.getName()))
+                .filter(product -> product.getUsername().equals(authentication.getName()))
                 .map(this::convertProductToDto)
                 .collect(Collectors.toList());
     }
 
-    public ProductDto createProduct(ProductDto productDto, Principal principal) {
+    public ProductDto createProduct(ProductDto productDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Product product = modelMapper.map(productDto, Product.class);
-        product.setUsername(principal.getName());
+        product.setUsername(authentication.getName());
         return convertProductToDto(productRepository.save(product));
     }
 
@@ -46,8 +49,9 @@ public class ProductService {
             throw new ProductNotFoundException("Product not found!");
         }
         Product storedProduct = optionalProduct.get();
-        modelMapper.map(productDto, Product.class);
-        return convertProductToDto(productRepository.save(storedProduct));
+        modelMapper.map(productDto, storedProduct);
+        Product updatedProduct = productRepository.save(storedProduct);
+        return convertProductToDto(updatedProduct);
     }
 
     public void deleteProduct(Long id) {
@@ -58,8 +62,8 @@ public class ProductService {
         }
     }
 
-    public List<ProductDto> loadAllProductsForLoggedUser(Principal principal) {
-        List<Product> products = productRepository.findByUsername(principal.getName());
+    public List<ProductDto> loadAllProductsByUsername(String username) {
+        List<Product> products = productRepository.findByUsername(username);
         if (products.isEmpty()) {
             throw new ProductNotFoundException("Products not found!");
         }

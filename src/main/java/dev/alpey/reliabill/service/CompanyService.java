@@ -2,6 +2,7 @@ package dev.alpey.reliabill.service;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -85,6 +86,15 @@ public class CompanyService {
             throw new CompanyNotFoundException("There are no companies stored!");
         }
         return convertCompaniesToDtoList(companies);
+    }
+
+    public CompanyDto loadCompanyById(Long id) {
+        Optional<Company> optionalCompany = companyRepository.findById(id);
+        if (optionalCompany.isEmpty()) {
+            throw new NoSuchElementException("Company not found!");
+        }
+        Company company = optionalCompany.get();
+        return convertCompanyToDto(company);
     }
 
     public List<CompanyDto> loadAllCompanies() {

@@ -39,7 +39,16 @@ public class PaymentService {
         return convertPaymentToDto(savedPayment);
     }
 
-    public List<PaymentDto> loadByInvoiceId(Long invoiceId) {
+    public PaymentDto loadPaymentById(Long id) {
+        Optional<Payment> optionalPayment = paymentRepository.findById(id);
+        if (optionalPayment.isEmpty()) {
+            throw new NoSuchElementException("Payment not found!");
+        }
+        Payment payment = optionalPayment.get();
+        return convertPaymentToDto(payment);
+    }
+
+    public List<PaymentDto> loadPaymentByInvoiceId(Long invoiceId) {
         return paymentRepository.findByInvoiceId(invoiceId).stream()
                 .map(this::convertPaymentToDto)
                 .collect(Collectors.toList());

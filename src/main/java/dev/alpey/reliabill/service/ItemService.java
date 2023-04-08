@@ -1,6 +1,7 @@
 package dev.alpey.reliabill.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -59,6 +60,15 @@ public class ItemService {
         } else {
             throw new ItemNotFoundException("Item not found!");
         }
+    }
+
+    public ItemDto loadItemById(Long id) {
+        Optional<Item> optionalItem = itemRepository.findById(id);
+        if (optionalItem.isEmpty()) {
+            throw new NoSuchElementException("Item not found!");
+        }
+        Item item = optionalItem.get();
+        return convertItemToDto(item);
     }
 
     public List<ItemDto> loadAllItemsForInvoice(Long invoiceId) {

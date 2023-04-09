@@ -68,6 +68,11 @@ public class CompanyController {
         return companyService.searchCompanies(searchTerm, principal);
     }
 
+    @GetMapping("/own")
+    public CompanyDto fetchOwnCompany(Principal principal) {
+        return companyService.loadOwnCompany(principal);
+    }
+
     @GetMapping("/all")
     public List<CompanyDto> getAllCompanies() {
         return companyService.loadAllCompanies();

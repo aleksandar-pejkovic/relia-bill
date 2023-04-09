@@ -8,12 +8,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import dev.alpey.reliabill.model.entity.Company;
-import dev.alpey.reliabill.model.entity.User;
 
 @Repository
 public interface CompanyRepository extends ListCrudRepository<Company, Long> {
-
-    List<Company> findByUser(User user);
 
     @Query("SELECT c FROM Company c WHERE c.user.username = :username")
     List<Company> findByUsername(@Param("username") String username);

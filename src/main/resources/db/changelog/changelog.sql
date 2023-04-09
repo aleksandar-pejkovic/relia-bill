@@ -8,6 +8,7 @@ CREATE TABLE users (
     email VARCHAR(60) NOT NULL UNIQUE,
     name VARCHAR(60) NOT NULL,
     creation_date DATE NOT NULL,
+    company_id INT(11),
     PRIMARY KEY (id)
 );
 
@@ -100,14 +101,7 @@ CREATE TABLE companies (
         FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE
-        ON UPDATE CASCADE
 );
-
-ALTER TABLE users
-ADD company_id INT(11),
-ADD CONSTRAINT
-    FOREIGN KEY (company_id)
-    REFERENCES companies(id);
 
 CREATE TABLE invoices (
     id INT(11) NOT NULL AUTO_INCREMENT,

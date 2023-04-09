@@ -1,6 +1,5 @@
 package dev.alpey.reliabill.model.dto;
 
-import dev.alpey.reliabill.configuration.validation.invoice.invoicenumber.InvoiceNumber;
 import dev.alpey.reliabill.configuration.validation.product.name.ProductName;
 import dev.alpey.reliabill.configuration.validation.product.price.Price;
 import dev.alpey.reliabill.configuration.validation.product.quantity.Quantity;

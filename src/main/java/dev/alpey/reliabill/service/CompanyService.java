@@ -44,11 +44,10 @@ public class CompanyService {
         }
         User loggedUser = optionalUser.get();
         Company ownCompany = modelMapper.map(companyDto, Company.class);
-        ownCompany.setUser(loggedUser);
-        ownCompany = companyRepository.save(ownCompany);
-        loggedUser.setCompany(ownCompany);
-        Company savedCompany = userRepository.save(loggedUser).getCompany();
-        return convertCompanyToDto(savedCompany);
+        Company storedCompany = companyRepository.save(ownCompany);
+        loggedUser.setCompanyId(storedCompany.getId());
+        userRepository.save(loggedUser);
+        return convertCompanyToDto(storedCompany);
     }
 
     public CompanyDto createClientCompany(CompanyDto companyDto, Principal principal) {
@@ -88,6 +87,19 @@ public class CompanyService {
             throw new CompanyNotFoundException("There are no companies stored!");
         }
         return convertCompaniesToDtoList(companies);
+    }
+
+    public CompanyDto loadOwnCompany(Principal principal) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(
+                        () -> new UserNotFoundException("User not found!")
+                );
+        Optional<Company> optionalCompany = companyRepository.findById(user.getCompanyId());
+        if (optionalCompany.isEmpty()) {
+            throw new NoSuchElementException("Company not found!");
+        }
+        Company company = optionalCompany.get();
+        return convertCompanyToDto(company);
     }
 
     public CompanyDto loadCompanyById(Long id) {

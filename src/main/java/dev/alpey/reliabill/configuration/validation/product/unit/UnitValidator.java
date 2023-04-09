@@ -13,6 +13,9 @@ public class UnitValidator implements ConstraintValidator<Unit, String> {
 
     @Override
     public boolean isValid(String unit, ConstraintValidatorContext constraintValidatorContext) {
+        if (unit == null) {
+            return true;
+        }
         return unit.length() <= MAX_UNIT_LENGTH;
     }
 }

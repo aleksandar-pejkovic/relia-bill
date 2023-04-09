@@ -17,7 +17,7 @@ public enum DocumentType {
 
     public static boolean isValidDocumentType(String type) {
         try {
-            InvoiceStatus.valueOf(type);
+            DocumentType.valueOf(type);
             return true;
         } catch (IllegalArgumentException e) {
             return false;

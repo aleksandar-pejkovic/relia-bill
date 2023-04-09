@@ -1,5 +1,6 @@
 package dev.alpey.reliabill.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -35,6 +36,7 @@ public class PaymentService {
             throw new InvoiceNotFoundException("Invoice not found!");
         }
         payment.setInvoice(optionalInvoice.get());
+        payment.setPaymentDate(LocalDateTime.now());
         Payment savedPayment = paymentRepository.save(payment);
         return convertPaymentToDto(savedPayment);
     }

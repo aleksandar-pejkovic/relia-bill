@@ -31,7 +31,7 @@ public class ItemService {
     private ModelMapper modelMapper;
 
     public ItemDto createItem(ItemDto itemDto) {
-        Optional<Invoice> optionalInvoice = invoiceRepository.findById(itemDto.getId());
+        Optional<Invoice> optionalInvoice = invoiceRepository.findById(itemDto.getInvoiceId());
         if (optionalInvoice.isEmpty()) {
             throw new InvoiceNotFoundException("Invoice not found!");
         }

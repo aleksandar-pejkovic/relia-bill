@@ -6,7 +6,6 @@ import dev.alpey.reliabill.configuration.validation.product.plu.PluNumber;
 import dev.alpey.reliabill.configuration.validation.product.price.Price;
 import dev.alpey.reliabill.configuration.validation.product.taxrate.TaxRate;
 import dev.alpey.reliabill.configuration.validation.product.unit.Unit;
-import dev.alpey.reliabill.configuration.validation.user.username.Username;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +38,4 @@ public class ProductDto {
 
     @Price
     private Double price;
-
-    @Username
-    private String username;
 }

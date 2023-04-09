@@ -39,7 +39,7 @@ public class InvoiceService {
     }
 
     public InvoiceDto createInvoice(InvoiceDto invoiceDto) {
-        Optional<Company> optionalCompany = companyRepository.findById(invoiceDto.getId());
+        Optional<Company> optionalCompany = companyRepository.findById(invoiceDto.getCompanyId());
         if (optionalCompany.isEmpty()) {
             throw new CompanyNotFoundException("Invalid company!");
         }

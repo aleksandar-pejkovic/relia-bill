@@ -44,8 +44,10 @@ public class CompanyService {
         }
         User loggedUser = optionalUser.get();
         Company ownCompany = modelMapper.map(companyDto, Company.class);
-        loggedUser.setOwnCompany(ownCompany);
-        Company savedCompany = userRepository.save(loggedUser).getOwnCompany();
+        ownCompany.setUser(loggedUser);
+        ownCompany = companyRepository.save(ownCompany);
+        loggedUser.setCompany(ownCompany);
+        Company savedCompany = userRepository.save(loggedUser).getCompany();
         return convertCompanyToDto(savedCompany);
     }
 

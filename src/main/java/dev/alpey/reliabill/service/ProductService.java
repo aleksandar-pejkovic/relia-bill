@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.product.ProductNotFoundException;
+import dev.alpey.reliabill.enums.TaxRate;
 import dev.alpey.reliabill.model.dto.ProductDto;
 import dev.alpey.reliabill.model.entity.Product;
 import dev.alpey.reliabill.repository.ProductRepository;
@@ -40,6 +41,7 @@ public class ProductService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Product product = modelMapper.map(productDto, Product.class);
         product.setUsername(authentication.getName());
+        product.setTaxRate(TaxRate.fromRate(productDto.getTaxRate()));
         return convertProductToDto(productRepository.save(product));
     }
 

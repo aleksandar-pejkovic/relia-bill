@@ -53,7 +53,7 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
     @OneToOne
-    private Company ownCompany;
+    private Company company;
 
     @OneToMany(mappedBy = "user")
     private Set<Company> companies = new HashSet<>();

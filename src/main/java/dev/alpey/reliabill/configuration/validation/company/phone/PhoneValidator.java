@@ -14,7 +14,7 @@ public class PhoneValidator implements ConstraintValidator<Phone, String> {
 
     @Override
     public boolean isValid(String phone, ConstraintValidatorContext context) {
-        String regex = "^(\\\\+\\\\d{1,3})?[\\\\d\\\\-/]{6,15}$";
+        String regex = "^([+\\d{1,3}])?[\\d\\-/]{6,15}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(phone);
         return matcher.find();

@@ -89,6 +89,7 @@ public class ItemService {
         ItemDto itemDto = modelMapper.map(item, ItemDto.class);
         itemDto.setInvoiceId(item.getInvoice().getId());
         itemDto.setTaxRate(item.getTaxRate().getRate());
+        itemDto.calculateTax();
         return itemDto;
     }
 }

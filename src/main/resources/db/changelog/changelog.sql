@@ -110,7 +110,7 @@ CREATE TABLE invoices (
     creation_date DATE NOT NULL,
     due_date DATE NOT NULL,
     invoice_status VARCHAR(15) NOT NULL,
-    customer_id INT(11) NOT NULL,
+    company_id INT(11) NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT
         FOREIGN KEY (customer_id)

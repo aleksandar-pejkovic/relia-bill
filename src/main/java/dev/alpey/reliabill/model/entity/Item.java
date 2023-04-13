@@ -1,6 +1,7 @@
 package dev.alpey.reliabill.model.entity;
 
 import dev.alpey.reliabill.enums.TaxRate;
+import dev.alpey.reliabill.utils.TaxCalculation;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -40,7 +41,19 @@ public class Item {
     @Enumerated(EnumType.ORDINAL)
     private TaxRate taxRate;
 
+    private Double preTax;
+
+    private Double total;
+
+    private Double tax;
+
+    private Double subtotal;
+
     @ManyToOne
     @JoinColumn(name = "invoice_id")
     private Invoice invoice;
+
+    public void calculateTax() {
+        TaxCalculation.calculateTax(this);
+    }
 }

@@ -32,10 +32,8 @@ public class PaymentService {
     public PaymentDto createPayment(PaymentDto paymentDto) {
         Payment payment = modelMapper.map(paymentDto, Payment.class);
         Optional<Invoice> optionalInvoice = invoiceRepository.findById(paymentDto.getInvoiceId());
-        if (optionalInvoice.isEmpty()) {
-            throw new InvoiceNotFoundException("Invoice not found!");
-        }
-        payment.setInvoice(optionalInvoice.get());
+        Invoice invoice = optionalInvoice.orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
+        payment.setInvoice(invoice);
         payment.setPaymentDate(LocalDateTime.now());
         Payment savedPayment = paymentRepository.save(payment);
         return convertPaymentToDto(savedPayment);
@@ -43,10 +41,7 @@ public class PaymentService {
 
     public PaymentDto loadPaymentById(Long id) {
         Optional<Payment> optionalPayment = paymentRepository.findById(id);
-        if (optionalPayment.isEmpty()) {
-            throw new NoSuchElementException("Payment not found!");
-        }
-        Payment payment = optionalPayment.get();
+        Payment payment = optionalPayment.orElseThrow();
         return convertPaymentToDto(payment);
     }
 

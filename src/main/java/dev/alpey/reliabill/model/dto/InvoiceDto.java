@@ -33,5 +33,13 @@ public class InvoiceDto {
     @PaymentStatus
     private String invoiceStatus;
 
+    private Double preTax;
+
+    private Double total;
+
+    private Double tax;
+
+    private Double subtotal;
+
     private Long companyId;
 }

@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,7 +51,4 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
     private Long companyId;
-
-    @OneToMany(mappedBy = "user")
-    private Set<Company> companies = new HashSet<>();
 }

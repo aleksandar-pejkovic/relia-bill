@@ -1,6 +1,7 @@
 package dev.alpey.reliabill.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -69,10 +70,7 @@ public class UserService {
 
     public UserDto updateUser(UserDto userDto) {
         Optional<User> optionalUser = userRepository.findByUsername(userDto.getUsername());
-        if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException("User not found!");
-        }
-        User currentUser = optionalUser.get();
+        User currentUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
         userDto.setPassword(null);
         modelMapper.map(userDto, currentUser);
         User updatedUser = userRepository.save(currentUser);
@@ -81,10 +79,7 @@ public class UserService {
 
     public UserDto grantAdminRoleToUser(String username) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
-        if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException("User not found!");
-        }
-        User currentUser = optionalUser.get();
+        User currentUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
         currentUser.getRoles().add(roleRepository.findByName(RoleName.ADMIN));
         User adminUser = userRepository.save(currentUser);
         return convertUserToDto(adminUser);
@@ -105,7 +100,7 @@ public class UserService {
     public List<UserDto> loadAllUsers() {
         List<User> users = userRepository.findAll();
         if (users.isEmpty()) {
-            throw new UserNotFoundException("Users not found!");
+            return new ArrayList<>();
         }
         return convertUsersToDtoList(users);
     }
@@ -113,7 +108,7 @@ public class UserService {
     public List<UserDto> loadAdmins() {
         List<User> users = userRepository.findAdmins();
         if (users.isEmpty()) {
-            throw new UserNotFoundException("Admins not found!");
+            return new ArrayList<>();
         }
         return convertUsersToDtoList(users);
     }

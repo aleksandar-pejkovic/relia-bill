@@ -1,8 +1,8 @@
 package dev.alpey.reliabill.service;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,10 +39,7 @@ public class CompanyService {
 
     public CompanyDto createOwnCompany(CompanyDto companyDto, Principal principal) {
         Optional<User> optionalUser = userRepository.findByUsername(principal.getName());
-        if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException("User not found!");
-        }
-        User loggedUser = optionalUser.get();
+        User loggedUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
         Company ownCompany = modelMapper.map(companyDto, Company.class);
         Company storedCompany = companyRepository.save(ownCompany);
         loggedUser.setCompanyId(storedCompany.getId());
@@ -52,10 +49,7 @@ public class CompanyService {
 
     public CompanyDto createClientCompany(CompanyDto companyDto, Principal principal) {
         Optional<User> optionalUser = userRepository.findByUsername(principal.getName());
-        if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException("User not found!");
-        }
-        User loggedUser = optionalUser.get();
+        User loggedUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
         Company clientCompany = modelMapper.map(companyDto, Company.class);
         clientCompany.setUser(loggedUser);
         Company savedCompany = companyRepository.save(clientCompany);
@@ -64,10 +58,7 @@ public class CompanyService {
 
     public CompanyDto updateCompany(CompanyDto companyDto) {
         Optional<Company> optionalCompany = companyRepository.findById(companyDto.getId());
-        if (optionalCompany.isEmpty()) {
-            throw new CompanyNotFoundException("Company not found!");
-        }
-        Company storedCompany = optionalCompany.get();
+        Company storedCompany = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
         modelMapper.map(companyDto, storedCompany);
         Company updatedCompany = companyRepository.save(storedCompany);
         return convertCompanyToDto(updatedCompany);
@@ -84,7 +75,7 @@ public class CompanyService {
     public List<CompanyDto> loadAllCompaniesForLoggedUser(Principal principal) {
         List<Company> companies = companyRepository.findByUsername(principal.getName());
         if (companies.isEmpty()) {
-            throw new CompanyNotFoundException("There are no companies stored!");
+            return new ArrayList<>();
         }
         return convertCompaniesToDtoList(companies);
     }
@@ -95,26 +86,20 @@ public class CompanyService {
                         () -> new UserNotFoundException("User not found!")
                 );
         Optional<Company> optionalCompany = companyRepository.findById(user.getCompanyId());
-        if (optionalCompany.isEmpty()) {
-            throw new NoSuchElementException("Company not found!");
-        }
-        Company company = optionalCompany.get();
+        Company company = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
         return convertCompanyToDto(company);
     }
 
     public CompanyDto loadCompanyById(Long id) {
         Optional<Company> optionalCompany = companyRepository.findById(id);
-        if (optionalCompany.isEmpty()) {
-            throw new NoSuchElementException("Company not found!");
-        }
-        Company company = optionalCompany.get();
+        Company company = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
         return convertCompanyToDto(company);
     }
 
     public List<CompanyDto> loadAllCompanies() {
         List<Company> companies = companyRepository.findAll();
         if (companies.isEmpty()) {
-            throw new CompanyNotFoundException("There are no companies stored!");
+            return new ArrayList<>();
         }
         return convertCompaniesToDtoList(companies);
     }

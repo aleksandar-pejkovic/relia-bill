@@ -51,11 +51,11 @@ public class InvoiceController {
 
     @GetMapping
     public List<InvoiceDto> fetchAllInvoiceForLoggedUser(Principal principal) {
-        return invoiceService.loadAllInvoiceForLoggedUser(principal);
+        return invoiceService.loadAllInvoicesForLoggedUser(principal);
     }
 
     @GetMapping("/company/{companyId}")
     public List<InvoiceDto> fetchAllInvoiceForCompany(@PathVariable Long companyId) {
-        return invoiceService.loadAllInvoiceForCompany(companyId);
+        return invoiceService.loadAllInvoicesForCompany(companyId);
     }
 }

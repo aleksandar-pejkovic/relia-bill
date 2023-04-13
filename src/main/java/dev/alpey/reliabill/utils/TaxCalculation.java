@@ -5,7 +5,8 @@ import java.math.RoundingMode;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import dev.alpey.reliabill.model.dto.ItemDto;
+import dev.alpey.reliabill.model.entity.Invoice;
+import dev.alpey.reliabill.model.entity.Item;
 import dev.alpey.reliabill.service.ItemService;
 
 public final class TaxCalculation {
@@ -24,30 +25,46 @@ public final class TaxCalculation {
     private TaxCalculation() {
     }
 
-    public static void calculateTax(ItemDto itemDto) {
-        double precalculatedTaxRate;
-        if (itemDto.getTaxRate() == HIGHER_TAX_RATE) {
-            precalculatedTaxRate = HIGHER_PRECALCULATED_TAX_RATE;
-        } else if (itemDto.getTaxRate() == LOWER_TAX_RATE) {
-            precalculatedTaxRate = LOWER_PRECALCULATED_TAX_RATE;
-        } else {
-            precalculatedTaxRate = 1.0;
-        }
-        var price = itemDto.getPrice();
-        var quantity = itemDto.getQuantity();
+    public static void calculateTax(Item item) {
+        double precalculatedTaxRate = calculatePrecalculatedTaxRate(item.getTaxRate().getRate());
+        var price = item.getPrice();
+        var quantity = item.getQuantity();
         var preTax = BigDecimal.valueOf(price - (price * precalculatedTaxRate))
                 .setScale(2, RoundingMode.HALF_EVEN)
                 .doubleValue();
-        itemDto.setPreTax(preTax);
+        item.setPreTax(preTax);
         var total = BigDecimal.valueOf(quantity * price)
                 .setScale(2, RoundingMode.HALF_EVEN)
                 .doubleValue();
-        itemDto.setTotal(total);
+        item.setTotal(total);
         var tax = BigDecimal.valueOf(total).multiply(BigDecimal.valueOf(precalculatedTaxRate))
                 .setScale(2, RoundingMode.HALF_EVEN)
                 .doubleValue();
-        itemDto.setTax(tax);
+        item.setTax(tax);
         var subtotal = total - tax;
-        itemDto.setSubtotal(subtotal);
+        item.setSubtotal(subtotal);
+    }
+
+    public static void calculateTax(Invoice invoice) {
+        var total = invoice.getItems().stream()
+                .mapToDouble(Item::getTotal)
+                .sum();
+        invoice.setTotal(total);
+        var tax = invoice.getItems().stream()
+                .mapToDouble(Item::getTax)
+                .sum();
+        invoice.setTax(tax);
+        var subtotal = total - tax;
+        invoice.setSubtotal(subtotal);
+    }
+
+    private static double calculatePrecalculatedTaxRate(int taxRate) {
+        if (taxRate == HIGHER_TAX_RATE) {
+            return HIGHER_PRECALCULATED_TAX_RATE;
+        } else if (taxRate == LOWER_TAX_RATE) {
+            return LOWER_PRECALCULATED_TAX_RATE;
+        } else {
+            return 1.0;
+        }
     }
 }

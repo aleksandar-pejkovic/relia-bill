@@ -1,6 +1,7 @@
 package dev.alpey.reliabill.service;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,23 +41,18 @@ public class InvoiceService {
 
     public InvoiceDto createInvoice(InvoiceDto invoiceDto) {
         Optional<Company> optionalCompany = companyRepository.findById(invoiceDto.getCompanyId());
-        if (optionalCompany.isEmpty()) {
-            throw new CompanyNotFoundException("Invalid company!");
-        }
+        Company company = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Invalid company!"));
         Invoice invoice = modelMapper.map(invoiceDto, Invoice.class);
         invoice.setInvoiceStatus(InvoiceStatus.valueOf(invoiceDto.getInvoiceStatus()));
         invoice.setDocumentType(DocumentType.valueOf(invoiceDto.getDocumentType()));
-        invoice.setCompany(optionalCompany.get());
+        invoice.setCompany(company);
         Invoice savedInvoice = invoiceRepository.save(invoice);
         return convertInvoiceToDto(savedInvoice);
     }
 
     public InvoiceDto updateInvoice(InvoiceDto invoiceDto) {
         Optional<Invoice> optionalInvoice = invoiceRepository.findById(invoiceDto.getId());
-        if (optionalInvoice.isEmpty()) {
-            throw new InvoiceNotFoundException("Invoice not found!");
-        }
-        Invoice invoice = optionalInvoice.get();
+        Invoice invoice = optionalInvoice.orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
         modelMapper.map(invoiceDto, invoice);
         invoice.setInvoiceStatus(InvoiceStatus.valueOf(invoiceDto.getInvoiceStatus()));
         invoice.setDocumentType(DocumentType.valueOf(invoiceDto.getDocumentType()));
@@ -72,22 +68,20 @@ public class InvoiceService {
         }
     }
 
-    public List<InvoiceDto> loadAllInvoiceForLoggedUser(Principal principal) {
+    public List<InvoiceDto> loadAllInvoicesForLoggedUser(Principal principal) {
         List<Invoice> invoices = invoiceRepository.findByUsername(principal.getName());
         if (invoices.isEmpty()) {
-            throw new InvoiceNotFoundException("There are no stored invoices!");
+            return new ArrayList<>();
         }
         return convertInvoicesToDtoList(invoices);
     }
 
-    public List<InvoiceDto> loadAllInvoiceForCompany(Long companyId) {
+    public List<InvoiceDto> loadAllInvoicesForCompany(Long companyId) {
         Optional<Company> optionalCompany = companyRepository.findById(companyId);
-        if (optionalCompany.isEmpty()) {
-            throw new CompanyNotFoundException("Company not found!");
-        }
-        List<Invoice> invoices = invoiceRepository.findByCompany(optionalCompany.get());
+        Company company = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+        List<Invoice> invoices = invoiceRepository.findByCompany(company);
         if (invoices.isEmpty()) {
-            throw new InvoiceNotFoundException("There are no stored invoices for this company!");
+            return new ArrayList<>();
         }
         return convertInvoicesToDtoList(invoices);
     }

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import dev.alpey.reliabill.enums.DocumentType;
 import dev.alpey.reliabill.enums.InvoiceStatus;
+import dev.alpey.reliabill.utils.TaxCalculation;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -47,8 +48,14 @@ public class Invoice {
     @Enumerated(EnumType.STRING)
     private InvoiceStatus invoiceStatus;
 
+    private Double total;
+
+    private Double tax;
+
+    private Double subtotal;
+
     @ManyToOne
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "company_id")
     private Company company;
 
     @OneToMany(mappedBy = "invoice")
@@ -56,4 +63,8 @@ public class Invoice {
 
     @OneToMany(mappedBy = "invoice")
     private Set<Payment> payments = new HashSet<>();
+
+    public void calculateTax() {
+        TaxCalculation.calculateTax(this);
+    }
 }

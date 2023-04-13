@@ -1,5 +1,6 @@
 package dev.alpey.reliabill.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,10 +48,7 @@ public class ProductService {
 
     public ProductDto updateProduct(ProductDto productDto) {
         Optional<Product> optionalProduct = productRepository.findById(productDto.getId());
-        if (optionalProduct.isEmpty()) {
-            throw new ProductNotFoundException("Product not found!");
-        }
-        Product storedProduct = optionalProduct.get();
+        Product storedProduct = optionalProduct.orElseThrow(() -> new ProductNotFoundException("Product not found!"));
         modelMapper.map(productDto, storedProduct);
         Product updatedProduct = productRepository.save(storedProduct);
         return convertProductToDto(updatedProduct);
@@ -67,7 +65,7 @@ public class ProductService {
     public List<ProductDto> loadAllProductsByUsername(String username) {
         List<Product> products = productRepository.findByUsername(username);
         if (products.isEmpty()) {
-            throw new ProductNotFoundException("Products not found!");
+            return new ArrayList<>();
         }
         return convertProductsToDtoList(products);
     }
@@ -75,7 +73,7 @@ public class ProductService {
     public List<ProductDto> loadAllProducts() {
         List<Product> products = productRepository.findAll();
         if (products.isEmpty()) {
-            throw new ProductNotFoundException("Products not found!");
+            return new ArrayList<>();
         }
         return convertProductsToDtoList(products);
     }

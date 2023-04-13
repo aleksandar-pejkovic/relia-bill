@@ -1,5 +1,6 @@
 package dev.alpey.reliabill.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -32,49 +33,55 @@ public class ItemService {
 
     public ItemDto createItem(ItemDto itemDto) {
         Optional<Invoice> optionalInvoice = invoiceRepository.findById(itemDto.getInvoiceId());
-        if (optionalInvoice.isEmpty()) {
-            throw new InvoiceNotFoundException("Invoice not found!");
-        }
-        Invoice invoice = optionalInvoice.get();
+        Invoice invoice = optionalInvoice.orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
         Item item = modelMapper.map(itemDto, Item.class);
+
         item.setInvoice(invoice);
         item.setTaxRate(TaxRate.fromRate(itemDto.getTaxRate()));
+        item.calculateTax();
+        item.getInvoice().calculateTax();
+
         Item savedItem = itemRepository.save(item);
         return convertItemToDto(savedItem);
     }
 
     public ItemDto updateItem(ItemDto itemDto) {
         Optional<Item> optionalItem = itemRepository.findById(itemDto.getId());
-        if (optionalItem.isEmpty()) {
-            throw new ItemNotFoundException("Item not found!");
-        }
-        Item item = modelMapper.map(itemDto, Item.class);
+        Item item = optionalItem.orElseThrow(() -> new ItemNotFoundException("Item not found!"));
+        modelMapper.map(itemDto, item);
+
         item.setTaxRate(TaxRate.fromRate(itemDto.getTaxRate()));
+        item.calculateTax();
+        item.getInvoice().calculateTax();
+
         Item savedItem = itemRepository.save(item);
         return convertItemToDto(savedItem);
     }
 
     public void deleteItem(Long id) {
-        if (itemRepository.existsById(id)) {
-            itemRepository.deleteById(id);
-        } else {
-            throw new ItemNotFoundException("Item not found!");
-        }
+        Optional<Item> optionalItem = itemRepository.findById(id);
+        Item item = optionalItem.orElseThrow(() -> new ItemNotFoundException("Item not found!"));
+
+        Long invoiceId = optionalItem.get().getInvoice().getId();
+        itemRepository.delete(item);
+
+        Optional<Invoice> optionalInvoice = invoiceRepository.findById(invoiceId);
+        optionalInvoice.ifPresent(invoice -> {
+            invoice.calculateTax();
+            invoiceRepository.save(invoice);
+        });
     }
 
     public ItemDto loadItemById(Long id) {
         Optional<Item> optionalItem = itemRepository.findById(id);
-        if (optionalItem.isEmpty()) {
-            throw new NoSuchElementException("Item not found!");
-        }
-        Item item = optionalItem.get();
+        Item item = optionalItem.orElseThrow(() -> new NoSuchElementException("Item not found!"));
         return convertItemToDto(item);
     }
 
     public List<ItemDto> loadAllItemsForInvoice(Long invoiceId) {
         List<Item> items = itemRepository.findByInvoiceId(invoiceId);
         if (items.isEmpty()) {
-            throw new ItemNotFoundException("There are no items stored for this invoice!");
+            return new ArrayList<>();
         }
         return convertItemsToDtoList(items);
     }
@@ -89,7 +96,6 @@ public class ItemService {
         ItemDto itemDto = modelMapper.map(item, ItemDto.class);
         itemDto.setInvoiceId(item.getInvoice().getId());
         itemDto.setTaxRate(item.getTaxRate().getRate());
-        itemDto.calculateTax();
         return itemDto;
     }
 }

@@ -5,7 +5,6 @@ import dev.alpey.reliabill.configuration.validation.product.price.Price;
 import dev.alpey.reliabill.configuration.validation.product.quantity.Quantity;
 import dev.alpey.reliabill.configuration.validation.product.taxrate.TaxRate;
 import dev.alpey.reliabill.configuration.validation.product.unit.Unit;
-import dev.alpey.reliabill.utils.TaxCalculation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -45,8 +44,4 @@ public class ItemDto {
     private Double tax;
 
     private Double subtotal;
-
-    public void calculateTax() {
-        TaxCalculation.calculateTax(this);
-    }
 }

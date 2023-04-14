@@ -37,9 +37,7 @@ public class ItemService {
         Item item = modelMapper.map(itemDto, Item.class);
 
         item.setInvoice(invoice);
-        item.setTaxRate(TaxRate.fromRate(itemDto.getTaxRate()));
-        item.calculateTax();
-        item.getInvoice().calculateTax();
+        calculateTax(itemDto, item);
 
         Item savedItem = itemRepository.save(item);
         return convertItemToDto(savedItem);
@@ -50,9 +48,7 @@ public class ItemService {
         Item item = optionalItem.orElseThrow(() -> new ItemNotFoundException("Item not found!"));
         modelMapper.map(itemDto, item);
 
-        item.setTaxRate(TaxRate.fromRate(itemDto.getTaxRate()));
-        item.calculateTax();
-        item.getInvoice().calculateTax();
+        calculateTax(itemDto, item);
 
         Item savedItem = itemRepository.save(item);
         return convertItemToDto(savedItem);
@@ -79,13 +75,19 @@ public class ItemService {
 
     public List<ItemDto> loadAllItemsForInvoice(Long invoiceId) {
         List<Item> items = itemRepository.findByInvoiceId(invoiceId);
-        if (items.isEmpty()) {
-            return new ArrayList<>();
-        }
         return convertItemsToDtoList(items);
     }
 
+    private static void calculateTax(ItemDto itemDto, Item item) {
+        item.setTaxRate(TaxRate.fromRate(itemDto.getTaxRate()));
+        item.calculateTax();
+        item.getInvoice().calculateTax();
+    }
+
     private List<ItemDto> convertItemsToDtoList(List<Item> items) {
+        if (items.isEmpty()) {
+            return new ArrayList<>();
+        }
         return items.stream()
                 .map(this::convertItemToDto)
                 .collect(Collectors.toList());

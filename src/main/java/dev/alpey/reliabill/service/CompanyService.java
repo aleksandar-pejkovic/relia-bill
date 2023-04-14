@@ -74,9 +74,6 @@ public class CompanyService {
 
     public List<CompanyDto> loadAllCompaniesForLoggedUser(Principal principal) {
         List<Company> companies = companyRepository.findByUsername(principal.getName());
-        if (companies.isEmpty()) {
-            return new ArrayList<>();
-        }
         return convertCompaniesToDtoList(companies);
     }
 
@@ -98,13 +95,13 @@ public class CompanyService {
 
     public List<CompanyDto> loadAllCompanies() {
         List<Company> companies = companyRepository.findAll();
-        if (companies.isEmpty()) {
-            return new ArrayList<>();
-        }
         return convertCompaniesToDtoList(companies);
     }
 
     private List<CompanyDto> convertCompaniesToDtoList(List<Company> companies) {
+        if (companies.isEmpty()) {
+            return new ArrayList<>();
+        }
         return companies.stream()
                 .map(this::convertCompanyToDto)
                 .collect(Collectors.toList());

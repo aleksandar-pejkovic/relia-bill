@@ -99,17 +99,11 @@ public class UserService {
 
     public List<UserDto> loadAllUsers() {
         List<User> users = userRepository.findAll();
-        if (users.isEmpty()) {
-            return new ArrayList<>();
-        }
         return convertUsersToDtoList(users);
     }
 
     public List<UserDto> loadAdmins() {
         List<User> users = userRepository.findAdmins();
-        if (users.isEmpty()) {
-            return new ArrayList<>();
-        }
         return convertUsersToDtoList(users);
     }
 
@@ -136,6 +130,9 @@ public class UserService {
     }
 
     private List<UserDto> convertUsersToDtoList(List<User> users) {
+        if (users.isEmpty()) {
+            return new ArrayList<>();
+        }
         return users
                 .stream()
                 .map(this::convertUserToDto)

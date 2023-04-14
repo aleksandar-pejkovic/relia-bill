@@ -3,16 +3,10 @@ package dev.alpey.reliabill.utils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.model.entity.Item;
-import dev.alpey.reliabill.service.ItemService;
 
 public final class TaxCalculation {
-
-    @Autowired
-    private ItemService itemService;
 
     private static final int HIGHER_TAX_RATE = 20;
 

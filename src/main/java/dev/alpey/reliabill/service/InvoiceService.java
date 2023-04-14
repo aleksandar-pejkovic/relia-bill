@@ -70,9 +70,6 @@ public class InvoiceService {
 
     public List<InvoiceDto> loadAllInvoicesForLoggedUser(Principal principal) {
         List<Invoice> invoices = invoiceRepository.findByUsername(principal.getName());
-        if (invoices.isEmpty()) {
-            return new ArrayList<>();
-        }
         return convertInvoicesToDtoList(invoices);
     }
 
@@ -80,13 +77,13 @@ public class InvoiceService {
         Optional<Company> optionalCompany = companyRepository.findById(companyId);
         Company company = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
         List<Invoice> invoices = invoiceRepository.findByCompany(company);
-        if (invoices.isEmpty()) {
-            return new ArrayList<>();
-        }
         return convertInvoicesToDtoList(invoices);
     }
 
     private List<InvoiceDto> convertInvoicesToDtoList(List<Invoice> invoices) {
+        if (invoices.isEmpty()) {
+            return new ArrayList<>();
+        }
         return invoices.stream()
                 .map(this::convertInvoiceToDto)
                 .collect(Collectors.toList());

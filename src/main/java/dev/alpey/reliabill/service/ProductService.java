@@ -64,21 +64,18 @@ public class ProductService {
 
     public List<ProductDto> loadAllProductsByUsername(String username) {
         List<Product> products = productRepository.findByUsername(username);
-        if (products.isEmpty()) {
-            return new ArrayList<>();
-        }
         return convertProductsToDtoList(products);
     }
 
     public List<ProductDto> loadAllProducts() {
         List<Product> products = productRepository.findAll();
-        if (products.isEmpty()) {
-            return new ArrayList<>();
-        }
         return convertProductsToDtoList(products);
     }
 
     private List<ProductDto> convertProductsToDtoList(List<Product> products) {
+        if (products.isEmpty()) {
+            return new ArrayList<>();
+        }
         return products.stream()
                 .map(this::convertProductToDto)
                 .collect(Collectors.toList());

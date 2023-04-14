@@ -62,14 +62,13 @@ public class ItemService {
         Optional<Item> optionalItem = itemRepository.findById(id);
         Item item = optionalItem.orElseThrow(() -> new ItemNotFoundException("Item not found!"));
 
-        Long invoiceId = optionalItem.get().getInvoice().getId();
+        Invoice invoice = item.getInvoice();
+        invoice.getItems().remove(item);
+
         itemRepository.delete(item);
 
-        Optional<Invoice> optionalInvoice = invoiceRepository.findById(invoiceId);
-        optionalInvoice.ifPresent(invoice -> {
-            invoice.calculateTax();
-            invoiceRepository.save(invoice);
-        });
+        invoice.calculateTax();
+        invoiceRepository.save(invoice);
     }
 
     public ItemDto loadItemById(Long id) {

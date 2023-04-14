@@ -20,7 +20,7 @@ public final class TaxCalculation {
 
     private static final double HIGHER_PRECALCULATED_TAX_RATE = 0.1666666666666667;
 
-    private static final double LOWER_PRECALCULATED_TAX_RATE = 0.1666666666666667;
+    private static final double LOWER_PRECALCULATED_TAX_RATE = 0.09090909090909091;
 
     private TaxCalculation() {
     }

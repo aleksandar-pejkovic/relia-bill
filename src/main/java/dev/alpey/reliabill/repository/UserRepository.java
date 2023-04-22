@@ -27,4 +27,6 @@ public interface UserRepository extends ListCrudRepository<User, Long> {
     List<User> searchByEmail(String searchTerm);
 
     boolean existsByUsername(String username);
+
+    boolean existsByEmail(String email);
 }

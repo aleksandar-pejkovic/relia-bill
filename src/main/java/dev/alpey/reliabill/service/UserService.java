@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.alpey.reliabill.configuration.exceptions.user.EmailExistsException;
 import dev.alpey.reliabill.configuration.exceptions.user.UserNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UsernameExistsException;
 import dev.alpey.reliabill.enums.RoleName;
@@ -59,6 +60,9 @@ public class UserService {
     public UserDto registerUser(UserDto userDto) {
         if (userRepository.existsByUsername(userDto.getUsername())) {
             throw new UsernameExistsException("Account with username '" + userDto.getUsername() + "' already exist");
+        }
+        if (userRepository.existsByEmail(userDto.getEmail())) {
+            throw new EmailExistsException("Account with email '" + userDto.getEmail() + "' already exist");
         }
         userDto.setCreationDate(LocalDate.now());
         User user = modelMapper.map(userDto, User.class);

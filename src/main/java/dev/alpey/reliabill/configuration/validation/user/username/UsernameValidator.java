@@ -17,7 +17,7 @@ public class UsernameValidator implements ConstraintValidator<Username, String> 
         if (username == null) {
             return false;
         }
-        String regex = "^[a-z][a-z0-9]*${3,35}";
+        String regex = "^[a-zA-Z0-9_-]{3,35}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(username);
         return matcher.find();

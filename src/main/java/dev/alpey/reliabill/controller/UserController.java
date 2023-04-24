@@ -1,5 +1,6 @@
 package dev.alpey.reliabill.controller;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 
@@ -69,6 +70,11 @@ public class UserController {
     @GetMapping
     public List<UserDto> fetchAllUsers() {
         return userService.loadAllUsers();
+    }
+
+    @GetMapping("/current")
+    public UserDto fetchUsersByUsername(Principal principal) {
+        return userService.loadUserByUsername(principal.getName());
     }
 
     @GetMapping("/username/{username}")

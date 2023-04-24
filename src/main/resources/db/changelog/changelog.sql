@@ -29,7 +29,8 @@ CREATE TABLE users_roles (
   PRIMARY KEY (id),
   CONSTRAINT
     FOREIGN KEY (user_id)
-    REFERENCES users(id),
+    REFERENCES users(id)
+    ON DELETE CASCADE,
   CONSTRAINT
     FOREIGN KEY (role_id)
     REFERENCES roles(id)
@@ -113,7 +114,7 @@ CREATE TABLE invoices (
     company_id INT(11) NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT
-        FOREIGN KEY (customer_id)
+        FOREIGN KEY (company_id)
         REFERENCES companies(id)
         ON DELETE CASCADE
 );

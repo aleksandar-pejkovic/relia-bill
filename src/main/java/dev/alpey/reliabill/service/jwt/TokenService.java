@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class TokenService {
 
+    private static final int EXPIRATION_DAYS_FOR_TOKEN = 7;
+
     @Autowired
     private JwtEncoder encoder;
 
@@ -29,7 +31,7 @@ public class TokenService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
-                .expiresAt(now.plus(1, ChronoUnit.HOURS))
+                .expiresAt(now.plus(EXPIRATION_DAYS_FOR_TOKEN, ChronoUnit.DAYS))
                 .subject(authentication.getName())
                 .claim("scope", scope)
                 .build();

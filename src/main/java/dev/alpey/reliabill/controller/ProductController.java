@@ -21,7 +21,7 @@ import dev.alpey.reliabill.model.dto.ProductDto;
 import dev.alpey.reliabill.service.ProductService;
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {

@@ -38,7 +38,6 @@ public class CompanyDto {
     @BankAccount
     private String bankAccount;
 
-    @Name
     private String street;
 
     @Zip

@@ -8,9 +8,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.company.CompanyNotFoundException;
@@ -50,7 +48,6 @@ public class CompanyService {
         return convertCompanyToDto(storedCompany);
     }
 
-    @CachePut(value = "companiesByUser", key = "#principal.getName()")
     public CompanyDto createClientCompany(CompanyDto companyDto, Principal principal) {
         Optional<User> optionalUser = userRepository.findByUsername(principal.getName());
         User loggedUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
@@ -60,7 +57,6 @@ public class CompanyService {
         return convertCompanyToDto(savedCompany);
     }
 
-    @CachePut(value = "companiesByUser", key = "#result.id")
     public CompanyDto updateCompany(CompanyDto companyDto) {
         Optional<Company> optionalCompany = companyRepository.findById(companyDto.getId());
         Company storedCompany = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
@@ -69,7 +65,6 @@ public class CompanyService {
         return convertCompanyToDto(updatedCompany);
     }
 
-    @CacheEvict(value = "companiesByUser", key = "'id:' + #id")
     public void deleteCompany(Long id) {
         if (companyRepository.existsById(id)) {
             companyRepository.deleteById(id);
@@ -78,12 +73,13 @@ public class CompanyService {
         }
     }
 
-    @Cacheable(value = "companiesByUser", key = "#principal.getName()")
+    @CachePut(value = "companiesByUser", key = "#principal.getName()")
     public List<CompanyDto> loadAllCompaniesForLoggedUser(Principal principal) {
         List<Company> companies = companyRepository.findByUsername(principal.getName());
         return convertCompaniesToDtoList(companies);
     }
 
+    @CachePut(value = "ownCompany", key = "#username")
     public CompanyDto loadOwnCompany(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(

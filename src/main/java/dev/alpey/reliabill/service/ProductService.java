@@ -7,9 +7,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -41,7 +39,6 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    @CachePut(value = "productsByUser", key = "#result.id")
     public ProductDto createProduct(ProductDto productDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Product product = modelMapper.map(productDto, Product.class);
@@ -50,7 +47,6 @@ public class ProductService {
         return convertProductToDto(productRepository.save(product));
     }
 
-    @CachePut(value = "productsByUser", key = "#result.id")
     public ProductDto updateProduct(ProductDto productDto) {
         Optional<Product> optionalProduct = productRepository.findById(productDto.getId());
         Product storedProduct = optionalProduct.orElseThrow(() -> new ProductNotFoundException("Product not found!"));
@@ -59,7 +55,6 @@ public class ProductService {
         return convertProductToDto(updatedProduct);
     }
 
-    @CacheEvict(value = "productsByUser", key = "'id:' + #id")
     public void deleteProduct(Long id) {
         if (productRepository.existsById(id)) {
             productRepository.deleteById(id);
@@ -68,7 +63,7 @@ public class ProductService {
         }
     }
 
-    @Cacheable(value = "productsByUser", key = "#username")
+    @CachePut(value = "productsByUser", key = "#username")
     public List<ProductDto> loadAllProductsByUsername(String username) {
         List<Product> products = productRepository.findByUsername(username);
         return convertProductsToDtoList(products);

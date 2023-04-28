@@ -84,8 +84,8 @@ public class CompanyService {
         return convertCompaniesToDtoList(companies);
     }
 
-    public CompanyDto loadOwnCompany(Principal principal) {
-        User user = userRepository.findByUsername(principal.getName())
+    public CompanyDto loadOwnCompany(String username) {
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(
                         () -> new UserNotFoundException("User not found!")
                 );

@@ -39,4 +39,9 @@ public interface InvoiceRepository extends ListCrudRepository<Invoice, Long> {
     List<Invoice> findByCompany(Company company);
 
     List<Invoice> searchByInvoiceNumber(String searchTerm);
+
+    @Query("SELECT i.invoiceNumber "
+            + "FROM Invoice i "
+            + "WHERE i.id = :id ")
+    String findInvoiceNumberById(Long id);
 }

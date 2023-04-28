@@ -72,7 +72,7 @@ public class CompanyController {
 
     @GetMapping("/own")
     public CompanyDto fetchOwnCompany(Principal principal) {
-        return companyService.loadOwnCompany(principal);
+        return companyService.loadOwnCompany(principal.getName());
     }
 
     @GetMapping("/all")

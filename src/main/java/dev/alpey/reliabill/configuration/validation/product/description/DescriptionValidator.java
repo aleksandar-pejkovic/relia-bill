@@ -17,7 +17,7 @@ public class DescriptionValidator implements ConstraintValidator<Description, St
         if (description == null) {
             return true;
         }
-        String regex = "^[a-zA-Z0-9ČĆŠĐŽčćšđž,\\.!\\? \\u0027-]+${1,300}";
+        String regex = "^[a-zA-Z0-9ČĆŠĐŽčćšđž,.!? \\u0027-]{1,300}";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(description);
         return matcher.find();

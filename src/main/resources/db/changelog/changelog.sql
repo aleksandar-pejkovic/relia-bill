@@ -78,7 +78,7 @@ CREATE TABLE products (
   unit VARCHAR(5),
   description VARCHAR(300),
   tax_rate INT,
-  price DOUBLE,
+  price DECIMAL(10,2),
   username VARCHAR(60),
   PRIMARY KEY (id)
 );
@@ -122,9 +122,9 @@ CREATE TABLE invoices (
 CREATE TABLE items (
     id INT(11) NOT NULL AUTO_INCREMENT,
     product_name VARCHAR(60),
-    quantity DOUBLE PRECISION,
+    quantity DECIMAL(10,3),
     unit VARCHAR(5),
-    price DOUBLE PRECISION,
+    price DECIMAL(10,2),
     tax_rate TINYINT,
     invoice_id INT(11) NOT NULL,
     PRIMARY KEY (id),

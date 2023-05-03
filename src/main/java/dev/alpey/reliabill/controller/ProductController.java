@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,14 +39,12 @@ public class ProductController {
         return new ResponseEntity<>(productDto, HttpStatus.CREATED);
     }
 
-    @PreAuthorize("productDto.username == authentication.name or hasAuthority('SCOPE_UPDATE')")
     @PutMapping
     public ResponseEntity<ProductDto> updateProduct(@Valid @RequestBody ProductDto productDto) {
         ProductDto productResponse = productService.updateProduct(productDto);
         return new ResponseEntity<>(productDto, HttpStatus.OK);
     }
 
-    @PreAuthorize("productDto.username == authentication.name or hasAuthority('SCOPE_DELETE')")
     @DeleteMapping
     public String removeProduct(@Valid @RequestBody ProductDto productDto) {
         productService.deleteProduct(productDto.getId());

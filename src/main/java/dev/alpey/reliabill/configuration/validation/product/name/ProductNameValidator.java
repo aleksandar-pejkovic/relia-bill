@@ -17,7 +17,7 @@ public class ProductNameValidator implements ConstraintValidator<ProductName, St
         if (productName == null) {
             return false;
         }
-        String regex = "^[a-zA-Z0-9\\s-]+${2,50}";
+        String regex = "^[a-zA-Z0-9\\s-]{2,50}";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(productName);
         return matcher.find();

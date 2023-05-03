@@ -53,7 +53,7 @@ public class CompanyController {
         return new ResponseEntity<>(savedCompanyDto, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     public ResponseEntity<CompanyDto> updateCompany(@Valid @RequestBody CompanyDto companyDto) {
         CompanyDto updatedCompanyDto = companyService.updateCompany(companyDto);
         return new ResponseEntity<>(updatedCompanyDto, HttpStatus.OK);

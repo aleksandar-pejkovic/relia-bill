@@ -26,6 +26,7 @@ import dev.alpey.reliabill.model.dto.UserDto;
 import dev.alpey.reliabill.model.entity.Product;
 import dev.alpey.reliabill.model.entity.Role;
 import dev.alpey.reliabill.model.entity.User;
+import dev.alpey.reliabill.repository.CompanyRepository;
 import dev.alpey.reliabill.repository.ProductRepository;
 import dev.alpey.reliabill.repository.RoleRepository;
 import dev.alpey.reliabill.repository.UserRepository;
@@ -47,6 +48,9 @@ public class UserService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CompanyRepository companyRepository;
 
     @Transactional(readOnly = true)
     public Set<UserDto> searchUsers(String searchTerm) {

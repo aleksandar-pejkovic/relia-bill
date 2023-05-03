@@ -15,7 +15,11 @@ public class BeanConfiguration {
 
     @Bean
     public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager("companiesByUser", "productsByUser", "usersByUsername");
+        return new ConcurrentMapCacheManager(
+                "companiesByUser",
+                "ownCompany",
+                "productsByUser",
+                "usersByUsername");
     }
 
     @Bean

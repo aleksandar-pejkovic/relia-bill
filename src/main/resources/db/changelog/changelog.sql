@@ -90,13 +90,13 @@ CREATE TABLE companies (
     registration_number VARCHAR(8) NOT NULL,
     tax_number VARCHAR(9) NOT NULL,
     bank_account VARCHAR(20) NOT NULL,
-    street VARCHAR(60) NOT NULL,
-    zip VARCHAR(5) NOT NULL,
+    street VARCHAR(60),
+    zip VARCHAR(5),
     city VARCHAR(60) NOT NULL,
     phone VARCHAR(15) NOT NULL,
     email VARCHAR(60) NOT NULL,
-    website VARCHAR(60) NOT NULL,
-    user_id INT(11) NOT NULL,
+    website VARCHAR(60),
+    user_id INT(11),
     PRIMARY KEY (id),
     CONSTRAINT
         FOREIGN KEY (user_id)

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,10 +46,10 @@ public class ProductController {
         return new ResponseEntity<>(productDto, HttpStatus.OK);
     }
 
-    @DeleteMapping
-    public String removeProduct(@Valid @RequestBody ProductDto productDto) {
-        productService.deleteProduct(productDto.getId());
-        return "Product '" + productDto.getName() + "' deleted!";
+    @DeleteMapping("/{id}")
+    public String removeProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return "Product with id '" + id + "' deleted!";
     }
 
     @GetMapping

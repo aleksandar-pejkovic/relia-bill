@@ -85,6 +85,9 @@ public class CompanyService {
                 .orElseThrow(
                         () -> new UserNotFoundException("User not found!")
                 );
+        if (user.getCompanyId() == null) {
+            throw new CompanyNotFoundException("Company not found!");
+        }
         Optional<Company> optionalCompany = companyRepository.findById(user.getCompanyId());
         Company company = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
         return convertCompanyToDto(company);

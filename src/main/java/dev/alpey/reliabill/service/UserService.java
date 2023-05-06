@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -64,6 +65,7 @@ public class UserService {
                 .collect(Collectors.toSet());
     }
 
+    @CachePut(value = "usersByUsername", key = "#userDto.username")
     public UserDto registerUser(UserDto userDto) {
         if (userRepository.existsByUsername(userDto.getUsername())) {
             throw new UsernameExistsException("Account with username '" + userDto.getUsername() + "' already exist");
@@ -79,6 +81,7 @@ public class UserService {
         return convertUserToDto(registeredUser);
     }
 
+    @CachePut(value = "usersByUsername", key = "#userDto.username")
     public UserDto updateUser(UserDto userDto) {
         Optional<User> optionalUser = userRepository.findByUsername(userDto.getUsername());
         User currentUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
@@ -123,7 +126,7 @@ public class UserService {
         return convertUsersToDtoList(users);
     }
 
-    @CachePut(value = "usersByUsername", key = "#username")
+    @Cacheable(value = "usersByUsername", key = "#username")
     public UserDto loadUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .map(this::convertUserToDto)

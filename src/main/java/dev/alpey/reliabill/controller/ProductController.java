@@ -35,8 +35,8 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto productDto) {
-        ProductDto productResponse = productService.createProduct(productDto);
+    public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto productDto, Principal principal) {
+        ProductDto productResponse = productService.createProduct(productDto, principal);
         return new ResponseEntity<>(productDto, HttpStatus.CREATED);
     }
 
@@ -47,8 +47,8 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public String removeProduct(@PathVariable Long id) {
-        productService.deleteProduct(id);
+    public String removeProduct(@PathVariable Long id, Principal principal) {
+        productService.deleteProduct(id, principal);
         return "Product with id '" + id + "' deleted!";
     }
 

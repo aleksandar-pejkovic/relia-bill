@@ -54,14 +54,14 @@ public class CompanyController {
     }
 
     @PutMapping
-    public ResponseEntity<CompanyDto> updateCompany(@Valid @RequestBody CompanyDto companyDto) {
-        CompanyDto updatedCompanyDto = companyService.updateCompany(companyDto);
+    public ResponseEntity<CompanyDto> updateCompany(@Valid @RequestBody CompanyDto companyDto, Principal principal) {
+        CompanyDto updatedCompanyDto = companyService.updateCompany(companyDto, principal);
         return new ResponseEntity<>(updatedCompanyDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteCompany(@PathVariable Long id) {
-        companyService.deleteCompany(id);
+    public String deleteCompany(@PathVariable Long id, Principal principal) {
+        companyService.deleteCompany(id, principal);
         return "Company deleted!";
     }
 

@@ -1,5 +1,6 @@
 package dev.alpey.reliabill.service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -7,7 +8,8 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,7 +41,8 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    public ProductDto createProduct(ProductDto productDto) {
+    @CacheEvict(value = "productsByUser", key = "#principal.getName()")
+    public ProductDto createProduct(ProductDto productDto, Principal principal) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Product product = modelMapper.map(productDto, Product.class);
         product.setUsername(authentication.getName());
@@ -47,6 +50,7 @@ public class ProductService {
         return convertProductToDto(productRepository.save(product));
     }
 
+    @CacheEvict(value = "productsByUser", key = "#principal.getName()")
     public ProductDto updateProduct(ProductDto productDto) {
         Optional<Product> optionalProduct = productRepository.findById(productDto.getId());
         Product storedProduct = optionalProduct.orElseThrow(() -> new ProductNotFoundException("Product not found!"));
@@ -55,7 +59,8 @@ public class ProductService {
         return convertProductToDto(updatedProduct);
     }
 
-    public void deleteProduct(Long id) {
+    @CacheEvict(value = "productsByUser", key = "#principal.getName()")
+    public void deleteProduct(Long id, Principal principal) {
         if (productRepository.existsById(id)) {
             productRepository.deleteById(id);
         } else {
@@ -63,7 +68,7 @@ public class ProductService {
         }
     }
 
-    @CachePut(value = "productsByUser", key = "#username")
+    @Cacheable(value = "productsByUser", key = "#username")
     public List<ProductDto> loadAllProductsByUsername(String username) {
         List<Product> products = productRepository.findByUsername(username);
         return convertProductsToDtoList(products);

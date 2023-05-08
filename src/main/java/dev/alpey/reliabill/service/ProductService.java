@@ -51,7 +51,7 @@ public class ProductService {
     }
 
     @CacheEvict(value = "productsByUser", key = "#principal.getName()")
-    public ProductDto updateProduct(ProductDto productDto) {
+    public ProductDto updateProduct(ProductDto productDto, Principal principal) {
         Optional<Product> optionalProduct = productRepository.findById(productDto.getId());
         Product storedProduct = optionalProduct.orElseThrow(() -> new ProductNotFoundException("Product not found!"));
         modelMapper.map(productDto, storedProduct);

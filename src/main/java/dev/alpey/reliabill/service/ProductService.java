@@ -43,11 +43,11 @@ public class ProductService {
 
     @CacheEvict(value = "productsByUser", key = "#principal.getName()")
     public ProductDto createProduct(ProductDto productDto, Principal principal) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Product product = modelMapper.map(productDto, Product.class);
-        product.setUsername(authentication.getName());
+        product.setUsername(principal.getName());
         product.setTaxRate(TaxRate.fromRate(productDto.getTaxRate()));
-        return convertProductToDto(productRepository.save(product));
+        Product savedProduct = productRepository.save(product);
+        return convertProductToDto(savedProduct);
     }
 
     @CacheEvict(value = "productsByUser", key = "#principal.getName()")

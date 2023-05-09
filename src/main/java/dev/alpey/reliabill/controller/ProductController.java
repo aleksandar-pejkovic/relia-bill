@@ -37,13 +37,13 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto productDto, Principal principal) {
         ProductDto productResponse = productService.createProduct(productDto, principal);
-        return new ResponseEntity<>(productDto, HttpStatus.CREATED);
+        return new ResponseEntity<>(productResponse, HttpStatus.CREATED);
     }
 
     @PutMapping
     public ResponseEntity<ProductDto> updateProduct(@Valid @RequestBody ProductDto productDto, Principal principal) {
         ProductDto productResponse = productService.updateProduct(productDto, principal);
-        return new ResponseEntity<>(productDto, HttpStatus.OK);
+        return new ResponseEntity<>(productResponse, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

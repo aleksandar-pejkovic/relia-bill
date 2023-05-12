@@ -111,6 +111,9 @@ CREATE TABLE invoices (
     creation_date DATE NOT NULL,
     due_date DATE NOT NULL,
     invoice_status VARCHAR(15) NOT NULL,
+    total DECIMAL(10,2),
+    tax DECIMAL(10,2),
+    subtotal DECIMAL(10,2),
     company_id INT(11) NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT
@@ -126,6 +129,10 @@ CREATE TABLE items (
     unit VARCHAR(5),
     price DECIMAL(10,2),
     tax_rate TINYINT,
+    pre_tax DECIMAL(10,2),
+    total DECIMAL(10,2),
+    tax DECIMAL(10,2),
+    subtotal DECIMAL(10,2),
     invoice_id INT(11) NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT

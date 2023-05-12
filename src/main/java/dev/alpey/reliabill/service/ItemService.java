@@ -81,7 +81,9 @@ public class ItemService {
     private static void calculateTax(ItemDto itemDto, Item item) {
         item.setTaxRate(TaxRate.fromRate(itemDto.getTaxRate()));
         item.calculateTax();
-        item.getInvoice().calculateTax();
+        Invoice invoice = item.getInvoice();
+        invoice.getItems().add(item);
+        invoice.calculateTax();
     }
 
     private List<ItemDto> convertItemsToDtoList(List<Item> items) {

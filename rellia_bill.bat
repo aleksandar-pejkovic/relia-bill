@@ -1,0 +1,1 @@
+java -jar target/relia-bill-0.0.1-SNAPSHOT.jar

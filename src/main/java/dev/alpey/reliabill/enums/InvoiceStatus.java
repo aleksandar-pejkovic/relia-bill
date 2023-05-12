@@ -2,9 +2,19 @@ package dev.alpey.reliabill.enums;
 
 public enum InvoiceStatus {
 
-    PENDING,
-    PARTIALLY_PAID,
-    PAID;
+    PENDING("Pending"),
+    PARTIALLY_PAID("Partially paid"),
+    PAID("Paid");
+
+    private final String status;
+
+    InvoiceStatus(String status) {
+        this.status = status;
+    }
+
+    public String getType() {
+        return status;
+    }
 
     public static boolean isValidInvoiceStatus(String status) {
         try {

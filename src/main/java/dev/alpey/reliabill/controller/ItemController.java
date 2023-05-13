@@ -54,4 +54,9 @@ public class ItemController {
     public List<ItemDto> fetchAllItemsForInvoice(@PathVariable Long invoiceId) {
         return itemService.loadAllItemsForInvoice(invoiceId);
     }
+
+    @GetMapping
+    public List<ItemDto> fetchAllItemsForCurrentUser() {
+        return itemService.loadAllItemsForCurrentUser();
+    }
 }

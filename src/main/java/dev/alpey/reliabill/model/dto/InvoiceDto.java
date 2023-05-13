@@ -33,8 +33,6 @@ public class InvoiceDto {
     @PaymentStatus
     private String invoiceStatus;
 
-    private Double preTax;
-
     private Double total;
 
     private Double tax;

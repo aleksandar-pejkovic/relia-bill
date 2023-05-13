@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.invoice.InvoiceNotFoundException;
@@ -75,6 +76,12 @@ public class ItemService {
 
     public List<ItemDto> loadAllItemsForInvoice(Long invoiceId) {
         List<Item> items = itemRepository.findByInvoiceId(invoiceId);
+        return convertItemsToDtoList(items);
+    }
+
+    public List<ItemDto> loadAllItemsForCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<Item> items = itemRepository.findByUsername(username);
         return convertItemsToDtoList(items);
     }
 

@@ -22,7 +22,7 @@ import dev.alpey.reliabill.service.pdf.PdfService;
 
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @RestController
-@RequestMapping("api/pdf")
+@RequestMapping("/api/pdf")
 public class PdfController {
 
     @Autowired

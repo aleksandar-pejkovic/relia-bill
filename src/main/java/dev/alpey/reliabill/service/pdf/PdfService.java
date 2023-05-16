@@ -8,12 +8,10 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
@@ -38,7 +36,15 @@ public class PdfService {
     public static final int SPACING_BEFORE = 10;
     public static final int SPACING_AFTER = 10;
     public static final int FONT_SIZE = 10;
+    public static final int LARGE_FONT_SIZE = 16;
     public static final int NUM_COLUMNS_SIGNATURES = 3;
+    public static final int COMPANY_INFO_COLUMNS = 1;
+    public static final int TOTAL_INFO_COLUMNS = 9;
+    public static final int ALIGN_RIGHT = Element.ALIGN_RIGHT;
+    public static final int ALIGN_LEFT = Element.ALIGN_LEFT;
+    public static final Font DEFAULT_FONT = new Font(Font.FontFamily.HELVETICA, FONT_SIZE, Font.NORMAL);
+    public static final Font BOLD_FONT = new Font(Font.FontFamily.HELVETICA, FONT_SIZE, Font.BOLD);
+    public static final Font LARGE_FONT = new Font(Font.FontFamily.HELVETICA, LARGE_FONT_SIZE, Font.BOLD);
 
     @Autowired
     private UserRepository userRepository;
@@ -60,100 +66,102 @@ public class PdfService {
 
         Document document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, out);
-        Font defaultFont = new Font(Font.FontFamily.HELVETICA, FONT_SIZE, Font.NORMAL);
 
         document.open();
 
         // User's company data
-        PdfPTable userTable = new PdfPTable(1);
-        userTable.setWidthPercentage(100);
-        userTable.getDefaultCell().setHorizontalAlignment(Element.ALIGN_RIGHT);
-        userTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
-
-        userTable.addCell(new Phrase(userCompany.getName(),
-                new Font(Font.FontFamily.HELVETICA, FONT_SIZE, Font.BOLD)));
-        userTable.addCell(new Phrase(userCompany.getStreet(), defaultFont));
-        userTable.addCell(new Phrase(userCompany.getZip() + " " + userCompany.getCity(), defaultFont));
-        userTable.addCell(new Phrase("Reg. number/" + userCompany.getRegistrationNumber(), defaultFont));
-        userTable.addCell(new Phrase("Tax number/" + userCompany.getTaxNumber(), defaultFont));
-        userTable.addCell(new Phrase(userCompany.getEmail(), defaultFont));
-        userTable.addCell(new Phrase(userCompany.getPhone(), defaultFont));
-        userTable.addCell(new Phrase("Bank account/" + userCompany.getBankAccount(), defaultFont));
-
+        PdfPTable userTable = getCompanyInfoTable(userCompany, ALIGN_RIGHT);
         document.add(userTable);
 
+        Paragraph separationLine = new Paragraph("_________________________");
+        Paragraph clientHeading = new Paragraph("Klijent", BOLD_FONT);
+
+        document.add(clientHeading);
+        document.add(separationLine);
+        document.add(new Paragraph("\n"));
         // Client's company data
-        PdfPTable clientTable = new PdfPTable(5);
-        clientTable.setWidthPercentage(100);
-        clientTable.getDefaultCell().setHorizontalAlignment(Element.ALIGN_RIGHT);
-        clientTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
-
-        clientTable.addCell(new Phrase("Name", defaultFont));
-        clientTable.addCell(new Phrase(clientCompany.getName(), defaultFont));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase("Street", defaultFont));
-        clientTable.addCell(new Phrase(clientCompany.getStreet(), defaultFont));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase("City", defaultFont));
-        clientTable.addCell(new Phrase(clientCompany.getCity(), defaultFont));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase("Registration Number", defaultFont));
-        clientTable.addCell(new Phrase(clientCompany.getRegistrationNumber(), defaultFont));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase("Tax Number", defaultFont));
-        clientTable.addCell(new Phrase(clientCompany.getTaxNumber(), defaultFont));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase("Phone", defaultFont));
-        clientTable.addCell(new Phrase(clientCompany.getPhone(), defaultFont));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase("Email", defaultFont));
-        clientTable.addCell(new Phrase(clientCompany.getEmail(), defaultFont));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase("Director", defaultFont));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(""));
-        clientTable.addCell(new Phrase(clientCompany.getDirector(), defaultFont));
-
+        PdfPTable clientTable = getCompanyInfoTable(clientCompany, ALIGN_LEFT);
         document.add(clientTable);
+        document.add(separationLine);
 
         // Invoice heading
-        Paragraph heading = new Paragraph(
-                invoice.getDocumentType().getType() + ": " + invoice.getInvoiceNumber()
-                        + " - Date: " + invoice.getCreationDate()
-                        + " - Due date: " + invoice.getDueDate());
-        heading.setAlignment(Element.ALIGN_CENTER);
+        Paragraph heading = getHeading(invoice);
         document.add(heading);
+
+        // Main table with items
+        PdfPTable table = getItemsTable(items);
+        document.add(table);
+
+        PdfPTable totalInfo = getTotalInfo(invoice);
+
+        // Add the total info paragraph to the document
+        document.add(totalInfo);
+
+        document.add(new Paragraph("\n"));
+        document.add(new Paragraph("\n"));
+
+        // Signatures and stamp
+        PdfPTable signatureTable = getSignatureTable();
+        document.add(signatureTable);
+
+        // End
+        document.close();
+        return new ByteArrayInputStream(out.toByteArray());
+    }
+
+    private static PdfPTable getCompanyInfoTable(Company company, int alignSide) {
+        // Client's company data
+        PdfPTable companyTable = new PdfPTable(COMPANY_INFO_COLUMNS);
+        companyTable.setWidthPercentage(WIDTH_PERCENTAGE);
+        companyTable.getDefaultCell().setHorizontalAlignment(alignSide);
+        companyTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+
+        companyTable.addCell(new Phrase(company.getName(), BOLD_FONT));
+        companyTable.addCell(new Phrase(company.getStreet(), DEFAULT_FONT));
+        companyTable.addCell(new Phrase(company.getZip() + " " + company.getCity(), DEFAULT_FONT));
+        companyTable.addCell(new Phrase("MB: " + company.getRegistrationNumber(), DEFAULT_FONT));
+        companyTable.addCell(new Phrase("PIB: " + company.getTaxNumber(), DEFAULT_FONT));
+        companyTable.addCell(new Phrase(company.getPhone(), DEFAULT_FONT));
+        companyTable.addCell(new Phrase(company.getEmail(), DEFAULT_FONT));
+        companyTable.addCell(new Phrase("Tekuci racun: " + company.getBankAccount(), DEFAULT_FONT));
+        return companyTable;
+    }
+
+    private static Paragraph getHeading(Invoice invoice) {
+        Paragraph heading = new Paragraph(
+                invoice.getDocumentType().getType() + ": " + invoice.getInvoiceNumber(), LARGE_FONT);
+        heading.setAlignment(Element.ALIGN_CENTER);
+
+        PdfPTable dateTable = new PdfPTable(NUM_COLUMNS_SIGNATURES);
+        dateTable.setWidthPercentage(WIDTH_PERCENTAGE);
+        dateTable.getDefaultCell().setHorizontalAlignment(Element.ALIGN_JUSTIFIED);
+        dateTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+
+        dateTable.addCell(new Phrase("Datum izdavanja: " + invoice.getCreationDate(), DEFAULT_FONT));
+        dateTable.addCell(new Phrase(""));
+        dateTable.addCell(new Phrase("Datum dospeca: " + invoice.getDueDate(), DEFAULT_FONT));
+        heading.add(dateTable);
+        return heading;
+    }
+
+    private static PdfPTable getItemsTable(Set<Item> items) {
         // Invoice items table
         PdfPTable table = new PdfPTable(NUM_COLUMNS);
         table.setWidthPercentage(WIDTH_PERCENTAGE);
         table.setSpacingBefore(SPACING_BEFORE);
         table.setSpacingAfter(SPACING_AFTER);
 
-        PdfPCell tableHeaderCell1 = new PdfPCell(new Phrase("Product Name", defaultFont));
-        PdfPCell tableHeaderCell2 = new PdfPCell(new Phrase("Unit", defaultFont));
-        PdfPCell tableHeaderCell3 = new PdfPCell(new Phrase("Quantity", defaultFont));
-        PdfPCell tableHeaderCell4 = new PdfPCell(new Phrase("Price", defaultFont));
-        PdfPCell tableHeaderCell5 = new PdfPCell(new Phrase("VAT rate", defaultFont));
-        PdfPCell tableHeaderCell6 = new PdfPCell(new Phrase("Pre tax", defaultFont));
-        PdfPCell tableHeaderCell7 = new PdfPCell(new Phrase("Subtotal", defaultFont));
-        PdfPCell tableHeaderCell8 = new PdfPCell(new Phrase("Tax", defaultFont));
-        PdfPCell tableHeaderCell9 = new PdfPCell(new Phrase("Total", defaultFont));
+        PdfPCell tableHeaderCell0 = new PdfPCell(new Phrase("#", BOLD_FONT));
+        PdfPCell tableHeaderCell1 = new PdfPCell(new Phrase("Artikal", BOLD_FONT));
+        PdfPCell tableHeaderCell2 = new PdfPCell(new Phrase("JM", BOLD_FONT));
+        PdfPCell tableHeaderCell3 = new PdfPCell(new Phrase("Kolicina", BOLD_FONT));
+        PdfPCell tableHeaderCell4 = new PdfPCell(new Phrase("Cena", BOLD_FONT));
+        PdfPCell tableHeaderCell5 = new PdfPCell(new Phrase("PDV %", BOLD_FONT));
+        PdfPCell tableHeaderCell6 = new PdfPCell(new Phrase("Cena bez PDV-a", BOLD_FONT));
+        PdfPCell tableHeaderCell7 = new PdfPCell(new Phrase("Iznos sa PDV-om", BOLD_FONT));
+        PdfPCell tableHeaderCell8 = new PdfPCell(new Phrase("Iznos bez PDV-a", BOLD_FONT));
 
+        table.addCell(tableHeaderCell0);
         table.addCell(tableHeaderCell1);
         table.addCell(tableHeaderCell2);
         table.addCell(tableHeaderCell3);
@@ -162,19 +170,20 @@ public class PdfService {
         table.addCell(tableHeaderCell6);
         table.addCell(tableHeaderCell7);
         table.addCell(tableHeaderCell8);
-        table.addCell(tableHeaderCell9);
 
+        int num = 1;
         for (Item item : items) {
-            PdfPCell cell1 = new PdfPCell(new Phrase(item.getProductName()));
+            PdfPCell cell0 = new PdfPCell(new Phrase(Integer.toString(num++), DEFAULT_FONT));
+            PdfPCell cell1 = new PdfPCell(new Phrase(item.getProductName(), DEFAULT_FONT));
             PdfPCell cell2 = new PdfPCell(new Phrase(item.getUnit()));
-            PdfPCell cell3 = new PdfPCell(new Phrase(Double.toString(item.getQuantity())));
-            PdfPCell cell4 = new PdfPCell(new Phrase(Double.toString(item.getPrice())));
-            PdfPCell cell5 = new PdfPCell(new Phrase(Integer.toString(item.getTaxRate().getRate())));
-            PdfPCell cell6 = new PdfPCell(new Phrase(Double.toString(item.getPreTax())));
-            PdfPCell cell7 = new PdfPCell(new Phrase(Double.toString(item.getSubtotal())));
-            PdfPCell cell8 = new PdfPCell(new Phrase(Double.toString(item.getTax())));
-            PdfPCell cell9 = new PdfPCell(new Phrase(Double.toString(item.getTotal())));
+            PdfPCell cell3 = new PdfPCell(new Phrase(Double.toString(item.getQuantity()), DEFAULT_FONT));
+            PdfPCell cell4 = new PdfPCell(new Phrase(Double.toString(item.getPrice()), DEFAULT_FONT));
+            PdfPCell cell5 = new PdfPCell(new Phrase((item.getTaxRate().getRate()) + " %", DEFAULT_FONT));
+            PdfPCell cell6 = new PdfPCell(new Phrase(Double.toString(item.getPreTax()), DEFAULT_FONT));
+            PdfPCell cell7 = new PdfPCell(new Phrase(Double.toString(item.getTotal()), DEFAULT_FONT));
+            PdfPCell cell8 = new PdfPCell(new Phrase(Double.toString(item.getSubtotal()), DEFAULT_FONT));
 
+            table.addCell(cell0);
             table.addCell(cell1);
             table.addCell(cell2);
             table.addCell(cell3);
@@ -183,60 +192,59 @@ public class PdfService {
             table.addCell(cell6);
             table.addCell(cell7);
             table.addCell(cell8);
-            table.addCell(cell9);
         }
-        document.add(table);
+        return table;
+    }
 
-        // Define a key-pair style format for displaying the subtotal, tax, and total values
-        Font keyPairFont = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD);
-        Chunk subtotalChunk = new Chunk("Subtotal: ", keyPairFont);
-        Chunk taxChunk = new Chunk("Tax: ", keyPairFont);
-        Chunk totalChunk = new Chunk("Total: ", keyPairFont);
-        Chunk subtotalValueChunk = new Chunk(Double.toString(invoice.getSubtotal()));
-        Chunk taxValueChunk = new Chunk(Double.toString(invoice.getTax()));
-        Chunk totalValueChunk = new Chunk(Double.toString(invoice.getTotal()));
-        subtotalValueChunk.setFont(keyPairFont);
-        taxValueChunk.setFont(keyPairFont);
-        totalValueChunk.setFont(keyPairFont);
+    private static PdfPTable getTotalInfo(Invoice invoice) {
 
-        // Create a new paragraph to hold the key-pair style elements and align them on the right
-        Paragraph keyPairParagraph = new Paragraph();
-        keyPairParagraph.add(subtotalChunk);
-        keyPairParagraph.add(subtotalValueChunk);
-        keyPairParagraph.add(Chunk.NEWLINE);
-        keyPairParagraph.add(taxChunk);
-        keyPairParagraph.add(taxValueChunk);
-        keyPairParagraph.add(Chunk.NEWLINE);
-        keyPairParagraph.add(totalChunk);
-        keyPairParagraph.add(totalValueChunk);
-        keyPairParagraph.setAlignment(Element.ALIGN_RIGHT);
+        PdfPTable totalInfoTable = new PdfPTable(TOTAL_INFO_COLUMNS);
+        totalInfoTable.setWidthPercentage(WIDTH_PERCENTAGE);
+        totalInfoTable.getDefaultCell().setHorizontalAlignment(ALIGN_RIGHT);
+        totalInfoTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
 
-        // Add the key-pair style paragraph to the document
-        document.add(keyPairParagraph);
+        for (int i = 0; i < 7; i++) {
+            totalInfoTable.addCell(new Phrase(""));
+        }
+        totalInfoTable.addCell(new Phrase("Ukupno", BOLD_FONT));
+        totalInfoTable.addCell(new Phrase(Double.toString(invoice.getSubtotal()), BOLD_FONT));
 
-        document.add(new Paragraph("\n"));
-        document.add(new Paragraph("\n"));
+        for (int i = 0; i < 7; i++) {
+            totalInfoTable.addCell(new Phrase(""));
+        }
+        totalInfoTable.addCell(new Phrase("PDV", BOLD_FONT));
+        totalInfoTable.addCell(new Phrase(Double.toString(invoice.getTax()), BOLD_FONT));
 
+        for (int i = 0; i < 7; i++) {
+            totalInfoTable.addCell(new Phrase(""));
+        }
+        totalInfoTable.addCell(new Phrase("Za placanje:", BOLD_FONT));
+        totalInfoTable.addCell(new Phrase(Double.toString(invoice.getTotal()), BOLD_FONT));
+
+        return totalInfoTable;
+    }
+
+    private static PdfPTable getSignatureTable() {
         // Create table for signatures and stamp
         PdfPTable signatureTable = new PdfPTable(NUM_COLUMNS_SIGNATURES);
         signatureTable.setWidthPercentage(WIDTH_PERCENTAGE);
+        signatureTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
         // Add issuer signature cell to table
-        PdfPCell issuerSignatureCell = new PdfPCell(new Phrase("Issuer signature: _________________________"));
+        PdfPCell issuerSignatureCell = new PdfPCell(new Phrase("Fakturisao: "));
         issuerSignatureCell.setBorder(Rectangle.NO_BORDER);
         signatureTable.addCell(issuerSignatureCell);
-        // Add stamp cell to table
-        PdfPCell stampCell = new PdfPCell(new Phrase("Stamp: "));
-        stampCell.setBorder(Rectangle.NO_BORDER);
-        stampCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        signatureTable.addCell(stampCell);
+
+        signatureTable.addCell(new Phrase(""));
+
         // Add client signature cell to table
-        PdfPCell clientSignatureCell = new PdfPCell(new Phrase("Client signature: _________________________"));
+        PdfPCell clientSignatureCell = new PdfPCell(new Phrase("Primio: "));
+        clientSignatureCell.setHorizontalAlignment(ALIGN_RIGHT);
         clientSignatureCell.setBorder(Rectangle.NO_BORDER);
-        clientSignatureCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         signatureTable.addCell(clientSignatureCell);
-        // Add signature table to document
-        document.add(signatureTable);
-        document.close();
-        return new ByteArrayInputStream(out.toByteArray());
+
+        signatureTable.addCell(new Phrase("_________________________"));
+        signatureTable.addCell(new Phrase(""));
+        signatureTable.addCell(new Phrase("_________________________"));
+        return signatureTable;
     }
 }

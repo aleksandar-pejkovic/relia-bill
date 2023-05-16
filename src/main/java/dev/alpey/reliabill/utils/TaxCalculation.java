@@ -58,7 +58,7 @@ public final class TaxCalculation {
         } else if (taxRate == LOWER_TAX_RATE) {
             return LOWER_PRECALCULATED_TAX_RATE;
         } else {
-            return 1.0;
+            return 0.0;
         }
     }
 }

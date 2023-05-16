@@ -3,6 +3,7 @@ package dev.alpey.reliabill.service.pdf;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ import dev.alpey.reliabill.repository.UserRepository;
 @Service
 public class PdfService {
 
-    public static final int NUM_COLUMNS = 9;
+    public static final int NUM_COLUMNS = 8;
     public static final int WIDTH_PERCENTAGE = 100;
     public static final int SPACING_BEFORE = 10;
     public static final int SPACING_AFTER = 10;
@@ -39,12 +40,15 @@ public class PdfService {
     public static final int LARGE_FONT_SIZE = 16;
     public static final int NUM_COLUMNS_SIGNATURES = 3;
     public static final int COMPANY_INFO_COLUMNS = 1;
-    public static final int TOTAL_INFO_COLUMNS = 9;
+    public static final int TOTAL_INFO_COLUMNS = 8;
     public static final int ALIGN_RIGHT = Element.ALIGN_RIGHT;
     public static final int ALIGN_LEFT = Element.ALIGN_LEFT;
     public static final Font DEFAULT_FONT = new Font(Font.FontFamily.HELVETICA, FONT_SIZE, Font.NORMAL);
     public static final Font BOLD_FONT = new Font(Font.FontFamily.HELVETICA, FONT_SIZE, Font.BOLD);
     public static final Font LARGE_FONT = new Font(Font.FontFamily.HELVETICA, LARGE_FONT_SIZE, Font.BOLD);
+    public static final int NUMBER_OF_EMPTY_CELLS = 6;
+    public static final int PRODUCT_COLUMN_WIDTH = 4;
+    public static final DecimalFormat TWO_DECIMAL_FORMAT = new DecimalFormat("#,##0.00");
 
     @Autowired
     private UserRepository userRepository;
@@ -134,32 +138,60 @@ public class PdfService {
 
         PdfPTable dateTable = new PdfPTable(NUM_COLUMNS_SIGNATURES);
         dateTable.setWidthPercentage(WIDTH_PERCENTAGE);
-        dateTable.getDefaultCell().setHorizontalAlignment(Element.ALIGN_JUSTIFIED);
-        dateTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
 
-        dateTable.addCell(new Phrase("Datum izdavanja: " + invoice.getCreationDate(), DEFAULT_FONT));
-        dateTable.addCell(new Phrase(""));
-        dateTable.addCell(new Phrase("Datum dospeca: " + invoice.getDueDate(), DEFAULT_FONT));
+        PdfPCell creationDateCell = new PdfPCell(new Phrase(
+                "Datum izdavanja: "
+                        + invoice.getCreationDate(), DEFAULT_FONT));
+        creationDateCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        creationDateCell.setBorder(Rectangle.NO_BORDER);
+
+        PdfPCell dueDateCell = new PdfPCell(new Phrase(
+                "Datum dospeca: "
+                        + invoice.getDueDate(), DEFAULT_FONT));
+        dueDateCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        dueDateCell.setBorder(Rectangle.NO_BORDER);
+
+        PdfPCell issueLocationCell = new PdfPCell(new Phrase(
+                "Mesto izdavanja: "
+                        + invoice.getCompany().getCity(), DEFAULT_FONT));
+        issueLocationCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        issueLocationCell.setBorder(Rectangle.NO_BORDER);
+
+        dateTable.addCell(creationDateCell);
+        dateTable.addCell(dueDateCell);
+        dateTable.addCell(issueLocationCell);
+
         heading.add(dateTable);
         return heading;
     }
 
-    private static PdfPTable getItemsTable(Set<Item> items) {
+    private static PdfPTable getItemsTable(Set<Item> items) throws DocumentException {
         // Invoice items table
         PdfPTable table = new PdfPTable(NUM_COLUMNS);
         table.setWidthPercentage(WIDTH_PERCENTAGE);
         table.setSpacingBefore(SPACING_BEFORE);
         table.setSpacingAfter(SPACING_AFTER);
 
+        float[] columnWidths = {1, PRODUCT_COLUMN_WIDTH, 1, 2, 1, 2, 2, 2};
+        table.setWidths(columnWidths);
+
         PdfPCell tableHeaderCell0 = new PdfPCell(new Phrase("#", BOLD_FONT));
         PdfPCell tableHeaderCell1 = new PdfPCell(new Phrase("Artikal", BOLD_FONT));
-        PdfPCell tableHeaderCell2 = new PdfPCell(new Phrase("JM", BOLD_FONT));
-        PdfPCell tableHeaderCell3 = new PdfPCell(new Phrase("Kolicina", BOLD_FONT));
-        PdfPCell tableHeaderCell4 = new PdfPCell(new Phrase("Cena", BOLD_FONT));
-        PdfPCell tableHeaderCell5 = new PdfPCell(new Phrase("PDV %", BOLD_FONT));
-        PdfPCell tableHeaderCell6 = new PdfPCell(new Phrase("Cena bez PDV-a", BOLD_FONT));
-        PdfPCell tableHeaderCell7 = new PdfPCell(new Phrase("Iznos sa PDV-om", BOLD_FONT));
-        PdfPCell tableHeaderCell8 = new PdfPCell(new Phrase("Iznos bez PDV-a", BOLD_FONT));
+        PdfPCell tableHeaderCell2 = new PdfPCell(new Phrase("Kolicina", BOLD_FONT));
+        PdfPCell tableHeaderCell3 = new PdfPCell(new Phrase("Cena", BOLD_FONT));
+        PdfPCell tableHeaderCell4 = new PdfPCell(new Phrase("PDV %", BOLD_FONT));
+        PdfPCell tableHeaderCell5 = new PdfPCell(new Phrase("Cena bez PDV-a", BOLD_FONT));
+        PdfPCell tableHeaderCell6 = new PdfPCell(new Phrase("Iznos sa PDV-om", BOLD_FONT));
+        PdfPCell tableHeaderCell7 = new PdfPCell(new Phrase("Iznos bez PDV-a", BOLD_FONT));
+
+        tableHeaderCell0.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableHeaderCell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableHeaderCell2.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableHeaderCell3.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableHeaderCell4.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableHeaderCell5.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableHeaderCell6.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableHeaderCell7.setHorizontalAlignment(Element.ALIGN_CENTER);
 
         table.addCell(tableHeaderCell0);
         table.addCell(tableHeaderCell1);
@@ -169,19 +201,27 @@ public class PdfService {
         table.addCell(tableHeaderCell5);
         table.addCell(tableHeaderCell6);
         table.addCell(tableHeaderCell7);
-        table.addCell(tableHeaderCell8);
 
         int num = 1;
+
         for (Item item : items) {
             PdfPCell cell0 = new PdfPCell(new Phrase(Integer.toString(num++), DEFAULT_FONT));
             PdfPCell cell1 = new PdfPCell(new Phrase(item.getProductName(), DEFAULT_FONT));
-            PdfPCell cell2 = new PdfPCell(new Phrase(item.getUnit()));
-            PdfPCell cell3 = new PdfPCell(new Phrase(Double.toString(item.getQuantity()), DEFAULT_FONT));
-            PdfPCell cell4 = new PdfPCell(new Phrase(Double.toString(item.getPrice()), DEFAULT_FONT));
-            PdfPCell cell5 = new PdfPCell(new Phrase((item.getTaxRate().getRate()) + " %", DEFAULT_FONT));
-            PdfPCell cell6 = new PdfPCell(new Phrase(Double.toString(item.getPreTax()), DEFAULT_FONT));
-            PdfPCell cell7 = new PdfPCell(new Phrase(Double.toString(item.getTotal()), DEFAULT_FONT));
-            PdfPCell cell8 = new PdfPCell(new Phrase(Double.toString(item.getSubtotal()), DEFAULT_FONT));
+            PdfPCell cell2 = new PdfPCell(new Phrase(TWO_DECIMAL_FORMAT.format(item.getQuantity()), DEFAULT_FONT));
+            PdfPCell cell3 = new PdfPCell(new Phrase(TWO_DECIMAL_FORMAT.format(item.getPrice()), DEFAULT_FONT));
+            PdfPCell cell4 = new PdfPCell(new Phrase(item.getTaxRate().getRate() + " %", DEFAULT_FONT));
+            PdfPCell cell5 = new PdfPCell(new Phrase(TWO_DECIMAL_FORMAT.format(item.getPreTax()), DEFAULT_FONT));
+            PdfPCell cell6 = new PdfPCell(new Phrase(TWO_DECIMAL_FORMAT.format(item.getTotal()), DEFAULT_FONT));
+            PdfPCell cell7 = new PdfPCell(new Phrase(TWO_DECIMAL_FORMAT.format(item.getSubtotal()), DEFAULT_FONT));
+
+            cell0.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+            cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell3.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell4.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell5.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell6.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell7.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
             table.addCell(cell0);
             table.addCell(cell1);
@@ -191,7 +231,6 @@ public class PdfService {
             table.addCell(cell5);
             table.addCell(cell6);
             table.addCell(cell7);
-            table.addCell(cell8);
         }
         return table;
     }
@@ -203,23 +242,23 @@ public class PdfService {
         totalInfoTable.getDefaultCell().setHorizontalAlignment(ALIGN_RIGHT);
         totalInfoTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < NUMBER_OF_EMPTY_CELLS; i++) {
             totalInfoTable.addCell(new Phrase(""));
         }
         totalInfoTable.addCell(new Phrase("Ukupno", BOLD_FONT));
-        totalInfoTable.addCell(new Phrase(Double.toString(invoice.getSubtotal()), BOLD_FONT));
+        totalInfoTable.addCell(new Phrase(TWO_DECIMAL_FORMAT.format(invoice.getSubtotal()), BOLD_FONT));
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < NUMBER_OF_EMPTY_CELLS; i++) {
             totalInfoTable.addCell(new Phrase(""));
         }
         totalInfoTable.addCell(new Phrase("PDV", BOLD_FONT));
-        totalInfoTable.addCell(new Phrase(Double.toString(invoice.getTax()), BOLD_FONT));
+        totalInfoTable.addCell(new Phrase(TWO_DECIMAL_FORMAT.format(invoice.getTax()), BOLD_FONT));
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < NUMBER_OF_EMPTY_CELLS; i++) {
             totalInfoTable.addCell(new Phrase(""));
         }
         totalInfoTable.addCell(new Phrase("Za placanje:", BOLD_FONT));
-        totalInfoTable.addCell(new Phrase(Double.toString(invoice.getTotal()), BOLD_FONT));
+        totalInfoTable.addCell(new Phrase(TWO_DECIMAL_FORMAT.format(invoice.getTotal()), BOLD_FONT));
 
         return totalInfoTable;
     }
@@ -232,13 +271,14 @@ public class PdfService {
         // Add issuer signature cell to table
         PdfPCell issuerSignatureCell = new PdfPCell(new Phrase("Fakturisao: "));
         issuerSignatureCell.setBorder(Rectangle.NO_BORDER);
+        issuerSignatureCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         signatureTable.addCell(issuerSignatureCell);
 
         signatureTable.addCell(new Phrase(""));
 
         // Add client signature cell to table
         PdfPCell clientSignatureCell = new PdfPCell(new Phrase("Primio: "));
-        clientSignatureCell.setHorizontalAlignment(ALIGN_RIGHT);
+        clientSignatureCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         clientSignatureCell.setBorder(Rectangle.NO_BORDER);
         signatureTable.addCell(clientSignatureCell);
 

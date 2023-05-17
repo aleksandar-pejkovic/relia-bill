@@ -23,7 +23,6 @@ public class CompanyDto {
 
     private Long id;
 
-    @Name
     private String name;
 
     @Name

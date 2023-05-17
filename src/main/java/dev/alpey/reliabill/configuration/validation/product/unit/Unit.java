@@ -15,7 +15,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Unit {
 
-    String message() default "Max 3 characters!";
+    String message() default "Max 5 characters!";
 
     Class<?>[] groups() default {};
 

@@ -3,6 +3,7 @@ package dev.alpey.reliabill.utils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import dev.alpey.reliabill.enums.TaxRate;
 import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.model.entity.Item;
 
@@ -50,6 +51,40 @@ public final class TaxCalculation {
         invoice.setTax(tax);
         var subtotal = total - tax;
         invoice.setSubtotal(subtotal);
+        calculateTaxDetailsPerTaxRate(invoice);
+    }
+
+    private static void calculateTaxDetailsPerTaxRate(Invoice invoice) {
+        var totalFor0 = getTaxAmountForRate(TaxRate.RATE_0, invoice);
+        var totalFor10 = getTaxAmountForRate(TaxRate.RATE_10, invoice);
+        var totalFor20 = invoice.getTotal() - totalFor10 - totalFor0;
+
+        var taxFor10 = BigDecimal.valueOf(totalFor10).multiply(BigDecimal.valueOf(LOWER_PRECALCULATED_TAX_RATE))
+                .setScale(2, RoundingMode.HALF_EVEN)
+                .doubleValue();
+        var subtotalFor10 = totalFor10 - taxFor10;
+
+        var taxFor20 = BigDecimal.valueOf(totalFor20).multiply(BigDecimal.valueOf(HIGHER_PRECALCULATED_TAX_RATE))
+                .setScale(2, RoundingMode.HALF_EVEN)
+                .doubleValue();
+        var subtotalFor20 = totalFor20 - taxFor20;
+
+        invoice.setTotalFor20(totalFor20);
+        invoice.setTaxFor20(taxFor20);
+        invoice.setSubtotalFor20(subtotalFor20);
+
+        invoice.setTotalFor10(totalFor10);
+        invoice.setTaxFor10(taxFor10);
+        invoice.setSubtotalFor10(subtotalFor10);
+
+        invoice.setTotalFor0(totalFor0);
+    }
+
+    private static double getTaxAmountForRate(TaxRate taxRate, Invoice invoice) {
+        return invoice.getItems().stream()
+                .filter(item -> item.getTaxRate() == taxRate)
+                .mapToDouble(Item::getTotal)
+                .sum();
     }
 
     private static double calculatePrecalculatedTaxRate(int taxRate) {

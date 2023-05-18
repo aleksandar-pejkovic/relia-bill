@@ -68,6 +68,7 @@ public class ProductService {
     public ProductDto updateProduct(ProductDto productDto, Principal principal) {
         Optional<Product> optionalProduct = productRepository.findById(productDto.getId());
         Product storedProduct = optionalProduct.orElseThrow(() -> new ProductNotFoundException("Product not found!"));
+        storedProduct.setTaxRate(TaxRate.fromRate(productDto.getTaxRate()));
         modelMapper.map(productDto, storedProduct);
         Product updatedProduct = productRepository.save(storedProduct);
         return convertProductToDto(updatedProduct);
@@ -146,7 +147,7 @@ public class ProductService {
                 Product product = new Product();
                 product.setPlu(plu);
                 String productName = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
-                product.setName(productName);
+                product.setName(productName.trim());
                 product.setPrice(price);
                 product.setUsername(principal.getName());
                 product.setTaxRate(TaxRate.RATE_20);

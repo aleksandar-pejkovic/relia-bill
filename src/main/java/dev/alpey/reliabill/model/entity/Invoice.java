@@ -54,6 +54,20 @@ public class Invoice {
 
     private Double subtotal;
 
+    private Double totalFor20;
+
+    private Double taxFor20;
+
+    private Double subtotalFor20;
+
+    private Double totalFor10;
+
+    private Double taxFor10;
+
+    private Double subtotalFor10;
+
+    private Double totalFor0;
+
     @ManyToOne
     @JoinColumn(name = "company_id")
     private Company company;

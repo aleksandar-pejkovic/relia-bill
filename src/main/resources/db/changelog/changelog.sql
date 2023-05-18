@@ -114,6 +114,13 @@ CREATE TABLE invoices (
     total DECIMAL(10,2),
     tax DECIMAL(10,2),
     subtotal DECIMAL(10,2),
+    total_for20 DECIMAL(10,2),
+    tax_for20 DECIMAL(10,2),
+    subtotal_for20 DECIMAL(10,2),
+    total_for10 DECIMAL(10,2),
+    tax_for10 DECIMAL(10,2),
+    subtotal_for10 DECIMAL(10,2),
+    total_for0 DECIMAL(10,2),
     company_id INT(11) NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT

@@ -9,6 +9,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -33,10 +34,11 @@ import dev.alpey.reliabill.repository.UserRepository;
 public class PdfService {
 
     public static final int NUM_COLUMNS = 8;
+    public static final int FOUR_COLUMNS = 4;
     public static final int WIDTH_PERCENTAGE = 100;
     public static final int SPACING_BEFORE = 10;
     public static final int SPACING_AFTER = 10;
-    public static final int FONT_SIZE = 10;
+    public static final int FONT_SIZE = 8;
     public static final int LARGE_FONT_SIZE = 16;
     public static final int NUM_COLUMNS_SIGNATURES = 3;
     public static final int COMPANY_INFO_COLUMNS = 1;
@@ -46,9 +48,11 @@ public class PdfService {
     public static final Font DEFAULT_FONT = new Font(Font.FontFamily.HELVETICA, FONT_SIZE, Font.NORMAL);
     public static final Font BOLD_FONT = new Font(Font.FontFamily.HELVETICA, FONT_SIZE, Font.BOLD);
     public static final Font LARGE_FONT = new Font(Font.FontFamily.HELVETICA, LARGE_FONT_SIZE, Font.BOLD);
+    public static final Font SMALL_FONT = new Font(Font.FontFamily.HELVETICA, 7, Font.NORMAL, BaseColor.GRAY);
     public static final int NUMBER_OF_EMPTY_CELLS = 6;
-    public static final int PRODUCT_COLUMN_WIDTH = 4;
+    public static final int PRODUCT_COLUMN_WIDTH = 6;
     public static final DecimalFormat TWO_DECIMAL_FORMAT = new DecimalFormat("#,##0.00");
+    public static final int MEDIUM_COLUMN_WIDTH = 3;
 
     @Autowired
     private UserRepository userRepository;
@@ -96,17 +100,33 @@ public class PdfService {
         PdfPTable table = getItemsTable(items);
         document.add(table);
 
-        PdfPTable totalInfo = getTotalInfo(invoice);
-
         // Add the total info paragraph to the document
+        PdfPTable totalInfo = getTotalInfo(invoice);
         document.add(totalInfo);
 
         document.add(new Paragraph("\n"));
+
+        // Add tax details per tax rate info
+        PdfPTable taxDetailsPerTaxRateInfo = getTaxDetailsPerTaxRateInfo(invoice);
+        document.add(taxDetailsPerTaxRateInfo);
+
+        document.add(new Paragraph("\n"));
         document.add(new Paragraph("\n"));
 
-        // Signatures and stamp
+        // Signatures
         PdfPTable signatureTable = getSignatureTable();
         document.add(signatureTable);
+
+        document.add(new Paragraph("\n"));
+
+        // Legal disclaimer
+        Paragraph legalDisclaimer = new Paragraph(new Phrase(
+                "Za zakasnelo placanje obracunava se zakonska zatezna kamata. "
+                        + "U slucaju spora odgovoran je nadlezni sud.",
+                SMALL_FONT
+        ));
+        legalDisclaimer.setAlignment(Element.ALIGN_CENTER);
+        document.add(legalDisclaimer);
 
         // End
         document.close();
@@ -133,8 +153,8 @@ public class PdfService {
 
     private static Paragraph getHeading(Invoice invoice) {
         Paragraph heading = new Paragraph(
-                invoice.getDocumentType().getType() + ": " + invoice.getInvoiceNumber(), LARGE_FONT);
-        heading.setAlignment(Element.ALIGN_CENTER);
+                invoice.getDocumentType().getType() + " " + invoice.getInvoiceNumber(), LARGE_FONT);
+        heading.setAlignment(Element.ALIGN_LEFT);
 
         PdfPTable dateTable = new PdfPTable(NUM_COLUMNS_SIGNATURES);
         dateTable.setWidthPercentage(WIDTH_PERCENTAGE);
@@ -172,7 +192,16 @@ public class PdfService {
         table.setSpacingBefore(SPACING_BEFORE);
         table.setSpacingAfter(SPACING_AFTER);
 
-        float[] columnWidths = {1, PRODUCT_COLUMN_WIDTH, 1, 2, 1, 2, 2, 2};
+        float[] columnWidths = {
+                1, // number
+                PRODUCT_COLUMN_WIDTH, // product name
+                2, // amount
+                MEDIUM_COLUMN_WIDTH, // price
+                1, //VAT
+                MEDIUM_COLUMN_WIDTH, // pre tax price
+                MEDIUM_COLUMN_WIDTH, // total
+                MEDIUM_COLUMN_WIDTH // subtotal
+        };
         table.setWidths(columnWidths);
 
         PdfPCell tableHeaderCell0 = new PdfPCell(new Phrase("#", BOLD_FONT));
@@ -192,6 +221,15 @@ public class PdfService {
         tableHeaderCell5.setHorizontalAlignment(Element.ALIGN_CENTER);
         tableHeaderCell6.setHorizontalAlignment(Element.ALIGN_CENTER);
         tableHeaderCell7.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+        tableHeaderCell0.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tableHeaderCell1.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tableHeaderCell2.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tableHeaderCell3.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tableHeaderCell4.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tableHeaderCell5.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tableHeaderCell6.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tableHeaderCell7.setBackgroundColor(BaseColor.LIGHT_GRAY);
 
         table.addCell(tableHeaderCell0);
         table.addCell(tableHeaderCell1);
@@ -263,6 +301,80 @@ public class PdfService {
         return totalInfoTable;
     }
 
+    private static PdfPTable getTaxDetailsPerTaxRateInfo(Invoice invoice) throws DocumentException {
+
+        PdfPTable taxDetailsPerTaxRateTable = new PdfPTable(FOUR_COLUMNS);
+        taxDetailsPerTaxRateTable.setWidthPercentage(WIDTH_PERCENTAGE);
+        taxDetailsPerTaxRateTable.getDefaultCell().setHorizontalAlignment(ALIGN_RIGHT);
+
+        float[] columnWidths = {2, 1, 1, 1};
+        taxDetailsPerTaxRateTable.setWidths(columnWidths);
+
+        PdfPCell descriptionCell = new PdfPCell(new Phrase("Poreska stopa", BOLD_FONT));
+        descriptionCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        descriptionCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        taxDetailsPerTaxRateTable.addCell(descriptionCell);
+
+        PdfPCell tableCell1 = new PdfPCell(new Phrase("Osnova", BOLD_FONT));
+        PdfPCell tableCell2 = new PdfPCell(new Phrase("PDV", BOLD_FONT));
+        PdfPCell tableCell3 = new PdfPCell(new Phrase("Iznos", BOLD_FONT));
+
+        tableCell1.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tableCell2.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tableCell3.setBackgroundColor(BaseColor.LIGHT_GRAY);
+
+        taxDetailsPerTaxRateTable.addCell(tableCell1);
+        taxDetailsPerTaxRateTable.addCell(tableCell2);
+        taxDetailsPerTaxRateTable.addCell(tableCell3);
+
+        if (invoice.getTotalFor20() > 0) {
+            PdfPCell taxRate20Cell = new PdfPCell(new Phrase("20 %", DEFAULT_FONT));
+            taxRate20Cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            taxDetailsPerTaxRateTable.addCell(taxRate20Cell);
+            taxDetailsPerTaxRateTable.addCell(new Phrase(
+                    TWO_DECIMAL_FORMAT.format(invoice.getSubtotalFor20()),
+                    DEFAULT_FONT));
+            taxDetailsPerTaxRateTable.addCell(new Phrase(
+                    TWO_DECIMAL_FORMAT.format(invoice.getTaxFor20()),
+                    DEFAULT_FONT));
+            taxDetailsPerTaxRateTable.addCell(new Phrase(
+                    TWO_DECIMAL_FORMAT.format(invoice.getTotalFor20()),
+                    DEFAULT_FONT));
+        }
+
+        if (invoice.getTotalFor10() > 0) {
+            PdfPCell taxRate10Cell = new PdfPCell(new Phrase("10 %", DEFAULT_FONT));
+            taxRate10Cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            taxDetailsPerTaxRateTable.addCell(taxRate10Cell);
+            taxDetailsPerTaxRateTable.addCell(new Phrase(
+                    TWO_DECIMAL_FORMAT.format(invoice.getSubtotalFor10()),
+                    DEFAULT_FONT));
+            taxDetailsPerTaxRateTable.addCell(new Phrase(
+                    TWO_DECIMAL_FORMAT.format(invoice.getTaxFor10()),
+                    DEFAULT_FONT));
+            taxDetailsPerTaxRateTable.addCell(new Phrase(
+                    TWO_DECIMAL_FORMAT.format(invoice.getTotalFor10()),
+                    DEFAULT_FONT));
+        }
+
+        if (invoice.getTotalFor0() > 0) {
+            PdfPCell taxRate0Cell = new PdfPCell(new Phrase("0 %", DEFAULT_FONT));
+            taxRate0Cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            taxDetailsPerTaxRateTable.addCell(taxRate0Cell);
+            taxDetailsPerTaxRateTable.addCell(new Phrase(
+                    TWO_DECIMAL_FORMAT.format(invoice.getTotalFor0()),
+                    DEFAULT_FONT));
+            taxDetailsPerTaxRateTable.addCell(new Phrase(
+                    TWO_DECIMAL_FORMAT.format(0),
+                    DEFAULT_FONT));
+            taxDetailsPerTaxRateTable.addCell(new Phrase(
+                    TWO_DECIMAL_FORMAT.format(invoice.getTotalFor0()),
+                    DEFAULT_FONT));
+        }
+
+        return taxDetailsPerTaxRateTable;
+    }
+
     private static PdfPTable getSignatureTable() {
         // Create table for signatures and stamp
         PdfPTable signatureTable = new PdfPTable(NUM_COLUMNS_SIGNATURES);
@@ -281,6 +393,10 @@ public class PdfService {
         clientSignatureCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         clientSignatureCell.setBorder(Rectangle.NO_BORDER);
         signatureTable.addCell(clientSignatureCell);
+
+        signatureTable.addCell(new Phrase(""));
+        signatureTable.addCell(new Phrase(""));
+        signatureTable.addCell(new Phrase(""));
 
         signatureTable.addCell(new Phrase("_________________________"));
         signatureTable.addCell(new Phrase(""));

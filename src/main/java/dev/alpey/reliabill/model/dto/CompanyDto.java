@@ -42,7 +42,6 @@ public class CompanyDto {
     @Zip
     private String zip;
 
-    @Name
     private String city;
 
     @Phone

@@ -145,7 +145,8 @@ public class ProductService {
 
                 Product product = new Product();
                 product.setPlu(plu);
-                product.setName(name);
+                String productName = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+                product.setName(productName);
                 product.setPrice(price);
                 product.setUsername(principal.getName());
                 product.setTaxRate(TaxRate.RATE_20);

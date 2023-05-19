@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,15 +161,21 @@ public class PdfService {
         PdfPTable dateTable = new PdfPTable(NUM_COLUMNS_SIGNATURES);
         dateTable.setWidthPercentage(WIDTH_PERCENTAGE);
 
+        DateTimeFormatter serbianDateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+
+        LocalDate creationDate = invoice.getCreationDate();
+        String formattedCreationDate = creationDate.format(serbianDateFormat);
+
+        LocalDate dueDate = invoice.getDueDate();
+        String formattedDueDate = dueDate.format(serbianDateFormat);
+
         PdfPCell creationDateCell = new PdfPCell(new Phrase(
-                "Datum izdavanja: "
-                        + invoice.getCreationDate(), DEFAULT_FONT));
+                "Datum izdavanja: " + formattedCreationDate, DEFAULT_FONT));
         creationDateCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         creationDateCell.setBorder(Rectangle.NO_BORDER);
 
         PdfPCell dueDateCell = new PdfPCell(new Phrase(
-                "Datum dospeca: "
-                        + invoice.getDueDate(), DEFAULT_FONT));
+                "Datum dospeca: " + formattedDueDate, DEFAULT_FONT));
         dueDateCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         dueDateCell.setBorder(Rectangle.NO_BORDER);
 

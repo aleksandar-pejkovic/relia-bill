@@ -83,8 +83,8 @@ public class PdfService {
         PdfPTable userTable = getCompanyInfoTable(userCompany, ALIGN_RIGHT);
         document.add(userTable);
 
-        Paragraph separationLine = new Paragraph("_________________________");
         Paragraph clientHeading = new Paragraph("Klijent", BOLD_FONT);
+        Paragraph separationLine = new Paragraph("__________________________________________________", SMALL_FONT);
 
         document.add(clientHeading);
         document.add(separationLine);
@@ -111,6 +111,24 @@ public class PdfService {
         // Add tax details per tax rate info
         PdfPTable taxDetailsPerTaxRateInfo = getTaxDetailsPerTaxRateInfo(invoice);
         document.add(taxDetailsPerTaxRateInfo);
+
+        // Show message if user is not in VAT system
+        if (!user.getVatStatus()) {
+
+            document.add(new Paragraph("\n"));
+
+            Paragraph noteHeading = new Paragraph("Beleska", BOLD_FONT);
+            Paragraph noteSeparationLine = new Paragraph(
+                    "_________________________________________________________________",
+                    SMALL_FONT);
+            Paragraph noteMessage = new Paragraph(
+                    "PDV nije obracunat u skladu sa clanom 24. Zakona o porezu na dodatu vrednost.",
+                    SMALL_FONT);
+
+            document.add(noteHeading);
+            document.add(noteSeparationLine);
+            document.add(noteMessage);
+        }
 
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("\n"));

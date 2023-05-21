@@ -8,6 +8,7 @@ CREATE TABLE users (
     email VARCHAR(60) NOT NULL UNIQUE,
     name VARCHAR(60) NOT NULL,
     creation_date DATE NOT NULL,
+    vat_status BOOLEAN,
     company_id INT(11),
     PRIMARY KEY (id)
 );

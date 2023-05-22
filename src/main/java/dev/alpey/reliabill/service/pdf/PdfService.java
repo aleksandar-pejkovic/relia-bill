@@ -24,6 +24,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import dev.alpey.reliabill.enums.DocumentType;
 import dev.alpey.reliabill.model.entity.Company;
 import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.model.entity.Item;
@@ -172,8 +173,10 @@ public class PdfService {
     }
 
     private static Paragraph getHeading(Invoice invoice) {
+        DocumentType documentType = invoice.getDocumentType();
+        String documentTypeToSerbian = documentType.equals(DocumentType.INVOICE) ? "Faktura" : "Profaktura";
         Paragraph heading = new Paragraph(
-                invoice.getDocumentType().getType() + " " + invoice.getInvoiceNumber(), LARGE_FONT);
+                documentTypeToSerbian + " " + invoice.getInvoiceNumber(), LARGE_FONT);
         heading.setAlignment(Element.ALIGN_LEFT);
 
         PdfPTable dateTable = new PdfPTable(NUM_COLUMNS_SIGNATURES);

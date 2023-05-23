@@ -163,13 +163,14 @@ CREATE TABLE payments (
 );
 
 --changeset apejkovic:2
-INSERT INTO users (username, password, email, name, creation_date) VALUES
+INSERT INTO users (username, password, email, name, creation_date, vat_status) VALUES
 (
     'pejko89',
     '$2a$10$c4k24Pk4lNy/v9wEZRsuT.LrTsYRLK7Jj7.mLahhCZwCgoWwAY7IW',
     'pejko1989@live.com',
     'Aleksandar Pejkovic',
-    '2023-04-09'
+    '2023-04-09',
+    1
 );
 
 INSERT INTO users_roles(user_id, role_id) VALUES

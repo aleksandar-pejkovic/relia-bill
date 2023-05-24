@@ -35,5 +35,7 @@ public class UserDto {
     @Name
     private String name;
 
+    private Boolean vatStatus;
+
     private LocalDate creationDate;
 }

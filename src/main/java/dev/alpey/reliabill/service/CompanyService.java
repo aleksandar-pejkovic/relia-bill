@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.company.CompanyNotFoundException;
@@ -40,7 +40,7 @@ public class CompanyService {
                 .collect(Collectors.toList());
     }
 
-    @CachePut(value = "ownCompany", key = "#principal.getName()")
+    @CacheEvict(value = "ownCompany", key = "#principal.getName()")
     public CompanyDto createOwnCompany(CompanyDto companyDto, Principal principal) {
         Optional<User> optionalUser = userRepository.findByUsername(principal.getName());
         User loggedUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
@@ -61,8 +61,10 @@ public class CompanyService {
         return convertCompanyToDto(savedCompany);
     }
 
-    @CachePut(value = "ownCompany", key = "#principal.getName()")
-    @CacheEvict(value = "companiesByUser", key = "#principal.getName()")
+    @Caching(evict = {
+            @CacheEvict(value = "ownCompany", key = "#principal.getName()"),
+            @CacheEvict(value = "companiesByUser", key = "#principal.getName()")
+    })
     public CompanyDto updateCompany(CompanyDto companyDto, Principal principal) {
         Optional<Company> optionalCompany = companyRepository.findById(companyDto.getId());
         Company storedCompany = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));

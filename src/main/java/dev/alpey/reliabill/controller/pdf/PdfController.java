@@ -20,7 +20,7 @@ import com.itextpdf.text.DocumentException;
 import dev.alpey.reliabill.repository.InvoiceRepository;
 import dev.alpey.reliabill.service.pdf.PdfService;
 
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:5173", "https://reliabill.netlify.app"})
 @RestController
 @RequestMapping("/api/pdf")
 public class PdfController {

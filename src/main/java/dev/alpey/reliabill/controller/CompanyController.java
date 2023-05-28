@@ -21,7 +21,7 @@ import dev.alpey.reliabill.model.dto.CompanyDto;
 import dev.alpey.reliabill.service.CompanyService;
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:5173", "https://reliabill.netlify.app"})
 @RestController
 @RequestMapping("/api/companies")
 public class CompanyController {

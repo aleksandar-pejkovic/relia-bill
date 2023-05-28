@@ -20,7 +20,7 @@ import dev.alpey.reliabill.model.dto.InvoiceDto;
 import dev.alpey.reliabill.service.InvoiceService;
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:5173", "https://reliabill.netlify.app"})
 @RestController
 @RequestMapping("/api/invoices")
 public class InvoiceController {

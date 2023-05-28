@@ -23,7 +23,7 @@ import dev.alpey.reliabill.model.dto.ProductDto;
 import dev.alpey.reliabill.service.ProductService;
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:5173", "https://reliabill.netlify.app"})
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {

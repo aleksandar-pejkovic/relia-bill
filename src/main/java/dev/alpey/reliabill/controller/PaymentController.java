@@ -18,7 +18,7 @@ import dev.alpey.reliabill.model.dto.PaymentDto;
 import dev.alpey.reliabill.service.PaymentService;
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:5173", "https://reliabill.netlify.app"})
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {

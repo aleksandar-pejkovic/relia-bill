@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.alpey.reliabill.service.jwt.TokenService;
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "https://reliabill.netlify.app"})
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

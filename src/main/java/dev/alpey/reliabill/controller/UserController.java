@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ import dev.alpey.reliabill.model.dto.UserDto;
 import dev.alpey.reliabill.service.UserService;
 import jakarta.validation.Valid;
 
+@CrossOrigin(origins = {"https://reliabill.netlify.app", "http://localhost:5173"})
 @RestController
 @RequestMapping("/api/users")
 @Validated

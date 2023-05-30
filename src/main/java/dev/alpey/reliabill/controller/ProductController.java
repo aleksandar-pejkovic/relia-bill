@@ -59,6 +59,7 @@ public class ProductController {
         return productService.loadAllProductsByUsername(principal.getName());
     }
 
+    @CrossOrigin
     @PostMapping("/upload")
     public List<ProductDto> uploadFile(@RequestParam("file") MultipartFile file, Principal principal) {
         if (file.isEmpty()) {

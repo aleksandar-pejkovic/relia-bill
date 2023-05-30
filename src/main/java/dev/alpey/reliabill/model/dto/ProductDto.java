@@ -1,5 +1,6 @@
 package dev.alpey.reliabill.model.dto;
 
+import dev.alpey.reliabill.configuration.validation.product.name.ProductName;
 import dev.alpey.reliabill.configuration.validation.product.plu.PluNumber;
 import dev.alpey.reliabill.configuration.validation.product.price.Price;
 import dev.alpey.reliabill.configuration.validation.product.taxrate.TaxRate;
@@ -22,7 +23,7 @@ public class ProductDto {
     @PluNumber
     private int plu;
 
-    //    @ProductName
+    @ProductName
     private String name;
 
     @Unit

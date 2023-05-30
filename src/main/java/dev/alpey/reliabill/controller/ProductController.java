@@ -59,7 +59,7 @@ public class ProductController {
         return productService.loadAllProductsByUsername(principal.getName());
     }
 
-    @CrossOrigin(origins = {"https://reliabill.netlify.app", "http://localhost:5173"})
+    @CrossOrigin(origins = {"https://reliabill.netlify.app", "http://localhost:5173"}, allowedHeaders = {"*"})
     @PostMapping("/upload")
     public List<ProductDto> uploadFile(@RequestParam("file") MultipartFile file, Principal principal) {
         if (file.isEmpty()) {

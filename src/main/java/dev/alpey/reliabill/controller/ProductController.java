@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,7 +59,6 @@ public class ProductController {
         return productService.loadAllProductsByUsername(principal.getName());
     }
 
-    @Async
     @PostMapping("/upload")
     public void uploadFile(@RequestParam("file") MultipartFile file, Principal principal) {
         if (file.isEmpty()) {

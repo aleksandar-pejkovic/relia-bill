@@ -5,7 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,7 @@ import dev.alpey.reliabill.model.entity.User;
 import dev.alpey.reliabill.repository.CompanyRepository;
 import dev.alpey.reliabill.repository.InvoiceRepository;
 import dev.alpey.reliabill.repository.UserRepository;
+import dev.alpey.reliabill.service.email.EmailService;
 
 @Service
 public class PdfService {
@@ -66,12 +70,34 @@ public class PdfService {
     @Autowired
     private InvoiceRepository invoiceRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     public InputStream generateInvoicePdf(String username, Long invoiceId) throws DocumentException {
         User user = userRepository.findByUsername(username).orElseThrow();
         Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow();
         Company userCompany = companyRepository.findById(user.getCompanyId()).orElseThrow();
         Company clientCompany = invoice.getCompany();
         Set<Item> items = invoice.getItems();
+
+        ZoneId belgradeTimeZone = ZoneId.of("Europe/Belgrade");
+        LocalDateTime currentDateTime = LocalDateTime.now(belgradeTimeZone);
+        String formattedDateTime = currentDateTime.format(
+                DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+        emailService.sendEmailToAdmin("""
+                        PDF invoice generated
+                        """,
+                """
+                        User %s with username %s generated an invoice %s.
+                        Invoice total is %s.
+                        Local time: %s.
+                        """.formatted(
+                        user.getName(),
+                        user.getUsername(),
+                        invoice.getInvoiceNumber(),
+                        invoice.getTotal(),
+                        formattedDateTime
+                ));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 

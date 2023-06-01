@@ -1,5 +1,9 @@
 package dev.alpey.reliabill.configuration.security;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,12 +23,16 @@ import dev.alpey.reliabill.model.entity.Permission;
 import dev.alpey.reliabill.model.entity.Role;
 import dev.alpey.reliabill.model.entity.User;
 import dev.alpey.reliabill.repository.UserRepository;
+import dev.alpey.reliabill.service.email.EmailService;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     @Override
@@ -36,6 +44,22 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (user.isEmpty()) {
             throw new UsernameNotFoundException("Username '" + username + "' not found!");
         } else {
+            if ("demo".equals(username)) {
+                ZoneId belgradeTimeZone = ZoneId.of("Europe/Belgrade");
+                LocalDateTime currentDateTime = LocalDateTime.now(belgradeTimeZone);
+                String formattedDateTime = currentDateTime.format(
+                        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+                emailService.sendEmailToAdmin("""
+                                Login with %s
+                                """.formatted(username),
+                        """
+                                Someone logged in with %s account.
+                                Login time: %s.
+                                """.formatted(
+                                username,
+                                formattedDateTime
+                        ));
+            }
             return buildUserDetails(user.get());
         }
     }

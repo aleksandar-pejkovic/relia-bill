@@ -95,6 +95,7 @@ public class ProductService {
         return convertProductsToDtoList(products);
     }
 
+    @CacheEvict(value = "productsByUser", key = "#principal.getName()")
     public void saveProductsFromFile(byte[] fileData, String filename, Principal principal) {
         try (InputStream inputStream = new ByteArrayInputStream(fileData); Workbook workbook =
                 createWorkbook(inputStream, filename)) {

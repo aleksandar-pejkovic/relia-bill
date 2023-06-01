@@ -1,6 +1,7 @@
 package dev.alpey.reliabill.service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,6 +32,7 @@ import dev.alpey.reliabill.repository.CompanyRepository;
 import dev.alpey.reliabill.repository.ProductRepository;
 import dev.alpey.reliabill.repository.RoleRepository;
 import dev.alpey.reliabill.repository.UserRepository;
+import dev.alpey.reliabill.service.email.EmailService;
 
 @Service
 public class UserService {
@@ -53,6 +55,9 @@ public class UserService {
     @Autowired
     private CompanyRepository companyRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @Transactional(readOnly = true)
     public Set<UserDto> searchUsers(String searchTerm) {
         Set<User> results = new HashSet<>();
@@ -73,11 +78,24 @@ public class UserService {
         if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new EmailExistsException("Account with email '" + userDto.getEmail() + "' already exist");
         }
-        userDto.setCreationDate(LocalDate.now());
+        ZoneId belgradeTimeZone = ZoneId.of("Europe/Belgrade");
+        LocalDate currentDate = LocalDate.now(belgradeTimeZone);
+        userDto.setCreationDate(currentDate);
         User user = modelMapper.map(userDto, User.class);
         encryptUserPassword(user);
         assignDefaultRoleToUser(user);
         User registeredUser = userRepository.save(user);
+        emailService.sendEmailToAdmin("""
+                        Account created
+                        """,
+                """
+                        %s just created an account with a username %s.
+                        Creation date %s.
+                        """.formatted(
+                        registeredUser.getName(),
+                        registeredUser.getUsername(),
+                        registeredUser.getCreationDate()
+                ));
         return convertUserToDto(registeredUser);
     }
 
@@ -85,6 +103,10 @@ public class UserService {
     public UserDto updateUser(UserDto userDto) {
         Optional<User> optionalUser = userRepository.findByUsername(userDto.getUsername());
         User currentUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
+        if (!currentUser.getEmail().equals(userDto.getEmail())
+                && userRepository.existsByEmail(userDto.getEmail())) {
+            throw new EmailExistsException("Account with email '" + userDto.getEmail() + "' already exist");
+        }
         userDto.setPassword(null);
         modelMapper.map(userDto, currentUser);
         User updatedUser = userRepository.save(currentUser);

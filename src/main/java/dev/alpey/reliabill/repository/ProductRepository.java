@@ -12,5 +12,7 @@ public interface ProductRepository extends ListCrudRepository<Product, Long> {
 
     List<Product> findByUsername(String username);
 
+    List<Product> findByPlu(Integer plu);
+
     List<Product> searchByName(String name);
 }

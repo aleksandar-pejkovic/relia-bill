@@ -7,10 +7,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -94,71 +95,67 @@ public class ProductService {
         return convertProductsToDtoList(products);
     }
 
-    @CacheEvict(value = "productsByUser", key = "#principal.getName()")
-    public List<ProductDto> readProductsFromFile(byte[] fileData, String filename, Principal principal) {
-        List<Product> products = new ArrayList<>();
-        List<Product> savedProducts;
-
+    public void saveProductsFromFile(byte[] fileData, String filename, Principal principal) {
         try (InputStream inputStream = new ByteArrayInputStream(fileData); Workbook workbook =
                 createWorkbook(inputStream, filename)) {
             Sheet sheet = workbook.getSheetAt(0);
-            Iterator<Row> rowIterator = sheet.iterator();
+            Stream<Row> rowStream = StreamSupport.stream(sheet.spliterator(), false);
 
-            // Skip the header row
-            if (rowIterator.hasNext()) {
-                rowIterator.next();
-            }
+            rowStream
+                    .skip(1) // Skip the header row
+                    .forEach(row -> {
+                        int plu;
+                        String name;
+                        double price;
 
-            while (rowIterator.hasNext()) {
-                Row row = rowIterator.next();
+                        Cell pluCell = row.getCell(0);
+                        Cell nameCell = row.getCell(1);
+                        Cell priceCell = row.getCell(2);
 
-                int plu;
-                String name;
-                double price;
+                        if (pluCell.getCellType() == CellType.NUMERIC) {
+                            plu = (int) pluCell.getNumericCellValue();
+                        } else if (pluCell.getCellType() == CellType.STRING) {
+                            plu = Integer.parseInt(pluCell.getStringCellValue());
+                        } else {
+                            throw new IllegalArgumentException("Invalid PLU value.");
+                        }
 
-                Cell pluCell = row.getCell(0);
-                if (pluCell.getCellType() == CellType.NUMERIC) {
-                    plu = (int) pluCell.getNumericCellValue();
-                } else if (pluCell.getCellType() == CellType.STRING) {
-                    plu = Integer.parseInt(pluCell.getStringCellValue());
-                } else {
-                    // Handle the case when the PLU value is neither numeric nor string
-                    throw new IllegalArgumentException("Invalid PLU value.");
-                }
+                        if (nameCell.getCellType() == CellType.STRING) {
+                            name = nameCell.getStringCellValue();
+                        } else {
+                            throw new IllegalArgumentException("Invalid name value.");
+                        }
 
-                Cell nameCell = row.getCell(1);
-                if (nameCell.getCellType() == CellType.STRING) {
-                    name = nameCell.getStringCellValue();
-                } else {
-                    // Handle the case when the name value is not a string
-                    throw new IllegalArgumentException("Invalid name value.");
-                }
+                        if (priceCell.getCellType() == CellType.NUMERIC) {
+                            price = priceCell.getNumericCellValue();
+                        } else if (priceCell.getCellType() == CellType.STRING) {
+                            price = Double.parseDouble(priceCell.getStringCellValue());
+                        } else {
+                            throw new IllegalArgumentException("Invalid price value.");
+                        }
+                        String productName = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+                        Product product = Product.builder()
+                                .plu(plu)
+                                .name(productName.trim())
+                                .price(price)
+                                .username(principal.getName())
+                                .taxRate(TaxRate.RATE_20)
+                                .build();
 
-                Cell priceCell = row.getCell(2);
-                if (priceCell.getCellType() == CellType.NUMERIC) {
-                    price = priceCell.getNumericCellValue();
-                } else if (priceCell.getCellType() == CellType.STRING) {
-                    price = Double.parseDouble(priceCell.getStringCellValue());
-                } else {
-                    // Handle the case when the price value is neither numeric nor string
-                    throw new IllegalArgumentException("Invalid price value.");
-                }
-
-                Product product = new Product();
-                product.setPlu(plu);
-                String productName = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
-                product.setName(productName.trim());
-                product.setPrice(price);
-                product.setUsername(principal.getName());
-                product.setTaxRate(TaxRate.RATE_20);
-
-                products.add(product);
-            }
-            savedProducts = productRepository.saveAll(products);
-        } catch (IOException | EncryptedDocumentException ex) {
-            return new ArrayList<>();
+                        productRepository.findByPlu(product.getPlu())
+                                .stream()
+                                .filter(storedProduct -> storedProduct.getUsername().equals(product.getUsername()))
+                                .findFirst()
+                                .ifPresent(storedProduct -> product.setId(storedProduct.getId()));
+                        saveProduct(principal, product);
+                    });
+        } catch (IOException | EncryptedDocumentException ignored) {
         }
-        return convertProductsToDtoList(savedProducts);
+    }
+
+    @CacheEvict(value = "productsByUser", key = "#principal.getName()")
+    private void saveProduct(Principal principal, Product product) {
+        productRepository.save(product);
     }
 
     private Workbook createWorkbook(InputStream inputStream, String filename) throws IOException {

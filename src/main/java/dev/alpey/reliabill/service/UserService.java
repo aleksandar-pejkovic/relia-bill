@@ -113,6 +113,23 @@ public class UserService {
         return convertUserToDto(updatedUser);
     }
 
+    public void resetPassword(String username, String oldPassword, String newPassword) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        User user = optionalUser.orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if ("demo".equals(user.getUsername())) {
+            throw new IllegalArgumentException("Password reset for demo account not allowed");
+        }
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Old password is incorrect");
+        }
+
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+    }
+
     public UserDto grantAdminRoleToUser(String username) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         User currentUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));

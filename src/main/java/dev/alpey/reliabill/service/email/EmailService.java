@@ -47,4 +47,18 @@ public class EmailService {
             System.out.println("Mail server connection failed. Email was not sent to admin(s)!");
         }
     }
+
+    @Async
+    public void sendEmail(String email, String subject, String text) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(sender);
+        message.setTo(email);
+        message.setSubject(subject);
+        message.setText(text);
+        try {
+            emailSender.send(message);
+        } catch (MailSendException e) {
+            System.out.println("Mail server connection failed. Email was not sent to admin(s)!");
+        }
+    }
 }

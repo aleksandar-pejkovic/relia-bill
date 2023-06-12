@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import dev.alpey.reliabill.configuration.validation.user.password.Password;
 import dev.alpey.reliabill.configuration.validation.user.username.Username;
 import dev.alpey.reliabill.model.dto.UserDto;
 import dev.alpey.reliabill.service.UserService;
@@ -54,18 +53,10 @@ public class UserController {
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(
-            @RequestParam("username") @Username String username,
-            @RequestParam("oldPassword") String oldPassword,
-            @RequestParam("newPassword") @Password String newPassword) {
-
-        try {
-            userService.resetPassword(username, oldPassword, newPassword);
-            return ResponseEntity.ok("Password reset successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestParam("email") String email) {
+        userService.resetPassword(email);
+        return new ResponseEntity<>("Password reset token was sent!", HttpStatus.OK);
     }
 
     @Secured("SCOPE_GRANT_ADMIN")

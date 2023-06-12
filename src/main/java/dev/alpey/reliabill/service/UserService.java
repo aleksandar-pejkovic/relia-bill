@@ -1,6 +1,7 @@
 package dev.alpey.reliabill.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,10 +9,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,10 +28,12 @@ import dev.alpey.reliabill.configuration.exceptions.user.UserNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UsernameExistsException;
 import dev.alpey.reliabill.enums.RoleName;
 import dev.alpey.reliabill.model.dto.UserDto;
+import dev.alpey.reliabill.model.entity.PasswordResetToken;
 import dev.alpey.reliabill.model.entity.Product;
 import dev.alpey.reliabill.model.entity.Role;
 import dev.alpey.reliabill.model.entity.User;
 import dev.alpey.reliabill.repository.CompanyRepository;
+import dev.alpey.reliabill.repository.PasswordResetTokenRepository;
 import dev.alpey.reliabill.repository.ProductRepository;
 import dev.alpey.reliabill.repository.RoleRepository;
 import dev.alpey.reliabill.repository.UserRepository;
@@ -56,7 +61,13 @@ public class UserService {
     private CompanyRepository companyRepository;
 
     @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Autowired
     private EmailService emailService;
+
+    @Value("${client.url}")
+    private String clientUrl;
 
     @Transactional(readOnly = true)
     public Set<UserDto> searchUsers(String searchTerm) {
@@ -113,21 +124,30 @@ public class UserService {
         return convertUserToDto(updatedUser);
     }
 
-    public void resetPassword(String username, String oldPassword, String newPassword) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        User user = optionalUser.orElseThrow(() -> new IllegalArgumentException("User not found"));
+    public void resetPassword(String email) {
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+        String token = UUID.randomUUID().toString();
+        String resetLink = clientUrl + "/reset-password?token=" + token;
+        createPasswordResetTokenForUser(user, token);
+        emailService.sendEmail(
+                user.getEmail(),
+                "Password reset",
+                """
+                        Please click the following link to reset your password:
+                        %s
+                        """.formatted(resetLink)
+        );
+    }
 
-        if ("demo".equals(user.getUsername())) {
-            throw new IllegalArgumentException("Password reset for demo account not allowed");
-        }
-
-        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new IllegalArgumentException("Old password is incorrect");
-        }
-
-        String encodedPassword = passwordEncoder.encode(newPassword);
-        user.setPassword(encodedPassword);
-        userRepository.save(user);
+    private void createPasswordResetTokenForUser(User user, String token) {
+        PasswordResetToken passwordResetToken = PasswordResetToken.builder()
+                .token(token)
+                .user(user)
+                .expiryDate(LocalDateTime.now().plusDays(1))
+                .build();
+        passwordResetTokenRepository.save(passwordResetToken);
     }
 
     public UserDto grantAdminRoleToUser(String username) {
@@ -168,6 +188,14 @@ public class UserService {
     @Cacheable(value = "usersByUsername", key = "#username")
     public UserDto loadUserByUsername(String username) {
         return userRepository.findByUsername(username)
+                .map(this::convertUserToDto)
+                .orElseThrow(
+                        () -> new UserNotFoundException("User not found!")
+                );
+    }
+
+    public UserDto findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
                 .map(this::convertUserToDto)
                 .orElseThrow(
                         () -> new UserNotFoundException("User not found!")

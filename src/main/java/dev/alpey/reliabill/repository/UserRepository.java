@@ -14,6 +14,8 @@ public interface UserRepository extends ListCrudRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
+    Optional<User> findByEmail(String email);
+
     @Query("SELECT u FROM User u JOIN u.roles r ON r.name = 'ADMIN'")
     List<User> findAdmins();
 

@@ -175,3 +175,15 @@ INSERT INTO users (username, password, email, name, creation_date, vat_status) V
 
 INSERT INTO users_roles(user_id, role_id) VALUES
     (1, 1);
+
+--changeset apejkovic:3
+CREATE TABLE password_reset_token (
+  id INT(11) PRIMARY KEY AUTO_INCREMENT,
+  token VARCHAR(255) NOT NULL,
+  user_id INT(11) NOT NULL,
+  expiry_date DATETIME NOT NULL,
+  CONSTRAINT
+    FOREIGN KEY (user_id)
+    REFERENCES users (id)
+    ON DELETE CASCADE
+);

@@ -6,8 +6,9 @@ import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,7 +40,10 @@ public class PdfController {
         String invoiceNumber = invoiceRepository.findInvoiceNumberById(id);
         // Return input stream as a response
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=" + invoiceNumber + ".pdf");
-        return new ResponseEntity<>(inputStreamResource, headers, HttpStatus.OK);
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.attachment().filename(invoiceNumber + ".pdf").build());
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(inputStreamResource);
     }
 }

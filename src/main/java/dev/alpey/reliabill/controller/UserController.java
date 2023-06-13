@@ -57,6 +57,15 @@ public class UserController {
         return new ResponseEntity<>("Password reset token was sent!", HttpStatus.OK);
     }
 
+    @PutMapping("/update-password")
+    public ResponseEntity<String> updatePassword(
+            @RequestParam("token") String token,
+            @RequestParam("newPassword") String newPassword
+    ) {
+        userService.updatePassword(token, newPassword);
+        return new ResponseEntity<>("Password updated!", HttpStatus.OK);
+    }
+
     @Secured("SCOPE_GRANT_ADMIN")
     @PutMapping("/promote/{username}")
     public ResponseEntity<UserDto> promoteUserToAdmin(@PathVariable @Username String username) {

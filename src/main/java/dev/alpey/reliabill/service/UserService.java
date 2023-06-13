@@ -23,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.alpey.reliabill.configuration.exceptions.passwordResetToken.PasswordResetTokenNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.EmailExistsException;
 import dev.alpey.reliabill.configuration.exceptions.user.UserNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UsernameExistsException;
@@ -148,6 +149,23 @@ public class UserService {
                 .expiryDate(LocalDateTime.now().plusDays(1))
                 .build();
         passwordResetTokenRepository.save(passwordResetToken);
+    }
+
+    public void updatePassword(String token, String newPassword) {
+        PasswordResetToken passwordResetToken = passwordResetTokenRepository
+                .findByToken(token)
+                .orElseThrow(() -> new PasswordResetTokenNotFoundException("Reset token has already been used!"));
+
+        if (passwordResetToken.getExpiryDate()
+                .isBefore(LocalDateTime.now())) {
+            passwordResetTokenRepository.delete(passwordResetToken);
+            throw new PasswordResetTokenNotFoundException("Reset token expired!");
+        }
+
+        User user = passwordResetToken.getUser();
+        encryptUserPassword(user, newPassword);
+        userRepository.save(user);
+        passwordResetTokenRepository.delete(passwordResetToken);
     }
 
     public UserDto grantAdminRoleToUser(String username) {

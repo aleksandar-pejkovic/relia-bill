@@ -1,5 +1,6 @@
 package dev.alpey.reliabill.service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -8,7 +9,8 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.invoice.InvoiceNotFoundException;
@@ -32,9 +34,10 @@ public class ItemService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public ItemDto createItem(ItemDto itemDto) {
-        Optional<Invoice> optionalInvoice = invoiceRepository.findById(itemDto.getInvoiceId());
-        Invoice invoice = optionalInvoice.orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
+    @CacheEvict(value = "itemsByUser", key = "#principal.getName()")
+    public ItemDto createItem(ItemDto itemDto, Principal principal) {
+        Invoice invoice = invoiceRepository.findById(itemDto.getInvoiceId())
+                .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
         Item item = modelMapper.map(itemDto, Item.class);
 
         item.setInvoice(invoice);
@@ -44,27 +47,16 @@ public class ItemService {
         return convertItemToDto(savedItem);
     }
 
-    public ItemDto updateItem(ItemDto itemDto) {
-        Optional<Item> optionalItem = itemRepository.findById(itemDto.getId());
-        Item item = optionalItem.orElseThrow(() -> new ItemNotFoundException("Item not found!"));
-        modelMapper.map(itemDto, item);
-
-        calculateTax(itemDto, item);
-
-        Item savedItem = itemRepository.save(item);
-        return convertItemToDto(savedItem);
-    }
-
-    public void deleteItem(Long id) {
-        Optional<Item> optionalItem = itemRepository.findById(id);
-        Item item = optionalItem.orElseThrow(() -> new ItemNotFoundException("Item not found!"));
+    @CacheEvict(value = "itemsByUser", key = "#principal.getName()")
+    public void deleteItem(Long id, Principal principal) {
+        Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("Item not found!"));
 
         Invoice invoice = item.getInvoice();
         invoice.getItems().remove(item);
 
         itemRepository.delete(item);
 
-        invoice.calculateTax();
+        invoice.setTotal(invoice.getTotal() - item.getTotal());
         invoiceRepository.save(invoice);
     }
 
@@ -79,9 +71,9 @@ public class ItemService {
         return convertItemsToDtoList(items);
     }
 
-    public List<ItemDto> loadAllItemsForCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<Item> items = itemRepository.findByUsername(username);
+    @Cacheable(value = "itemsByUser", key = "#principal.getName()")
+    public List<ItemDto> loadAllItemsForCurrentUser(Principal principal) {
+        List<Item> items = itemRepository.findByUsername(principal.getName());
         return convertItemsToDtoList(items);
     }
 
@@ -89,8 +81,7 @@ public class ItemService {
         item.setTaxRate(TaxRate.fromRate(itemDto.getTaxRate()));
         item.calculateTax();
         Invoice invoice = item.getInvoice();
-        invoice.getItems().add(item);
-        invoice.calculateTax();
+        invoice.setTotal(invoice.getTotal() + item.getTotal());
     }
 
     private List<ItemDto> convertItemsToDtoList(List<Item> items) {

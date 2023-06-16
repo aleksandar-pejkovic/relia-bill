@@ -12,6 +12,8 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         return new ConcurrentMapCacheManager(
                 "companiesByUser",
+                "invoicesByUser",
+                "itemsByUser",
                 "ownCompany",
                 "productsByUser",
                 "usersByUsername");

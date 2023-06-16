@@ -1,5 +1,6 @@
 package dev.alpey.reliabill.controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,20 +26,14 @@ public class ItemController {
     private ItemService itemService;
 
     @PostMapping
-    public ResponseEntity<ItemDto> createItem(@Valid @RequestBody ItemDto itemDto) {
-        ItemDto createdItem = itemService.createItem(itemDto);
+    public ResponseEntity<ItemDto> createItem(@Valid @RequestBody ItemDto itemDto, Principal principal) {
+        ItemDto createdItem = itemService.createItem(itemDto, principal);
         return new ResponseEntity<>(createdItem, HttpStatus.CREATED);
     }
 
-    @PutMapping
-    public ResponseEntity<ItemDto> updateItem(@Valid @RequestBody ItemDto itemDto) {
-        ItemDto updatedItem = itemService.updateItem(itemDto);
-        return new ResponseEntity<>(updatedItem, HttpStatus.OK);
-    }
-
     @DeleteMapping("/{id}")
-    public String deleteItem(@PathVariable Long id) {
-        itemService.deleteItem(id);
+    public String deleteItem(@PathVariable Long id, Principal principal) {
+        itemService.deleteItem(id, principal);
         return "Item deleted!";
     }
 
@@ -54,7 +48,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> fetchAllItemsForCurrentUser() {
-        return itemService.loadAllItemsForCurrentUser();
+    public List<ItemDto> fetchAllItemsForCurrentUser(Principal principal) {
+        return itemService.loadAllItemsForCurrentUser(principal);
     }
 }

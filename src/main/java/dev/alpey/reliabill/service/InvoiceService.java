@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.company.CompanyNotFoundException;
@@ -39,7 +41,8 @@ public class InvoiceService {
                 .collect(Collectors.toList());
     }
 
-    public InvoiceDto createInvoice(InvoiceDto invoiceDto) {
+    @CacheEvict(value = "invoicesByUser", key = "#principal.getName()")
+    public InvoiceDto createInvoice(InvoiceDto invoiceDto, Principal principal) {
         Optional<Company> optionalCompany = companyRepository.findById(invoiceDto.getCompanyId());
         Company company = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Invalid company!"));
         Invoice invoice = modelMapper.map(invoiceDto, Invoice.class);
@@ -50,7 +53,8 @@ public class InvoiceService {
         return convertInvoiceToDto(savedInvoice);
     }
 
-    public InvoiceDto updateInvoice(InvoiceDto invoiceDto) {
+    @CacheEvict(value = "invoicesByUser", key = "#principal.getName()")
+    public InvoiceDto updateInvoice(InvoiceDto invoiceDto, Principal principal) {
         Optional<Invoice> optionalInvoice = invoiceRepository.findById(invoiceDto.getId());
         Invoice invoice = optionalInvoice.orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
         modelMapper.map(invoiceDto, invoice);
@@ -60,14 +64,17 @@ public class InvoiceService {
         return convertInvoiceToDto(updatedInvoice);
     }
 
-    public void deleteInvoice(Long id) {
+    @CacheEvict(value = "invoicesByUser", key = "#principal.getName()")
+    public void deleteInvoice(Long id, Principal principal) {
         if (invoiceRepository.existsById(id)) {
-            invoiceRepository.deleteById(id);
+            Invoice invoice = invoiceRepository.findById(id).orElseThrow();
+            invoiceRepository.delete(invoice);
         } else {
             throw new InvoiceNotFoundException("Invoice not found!");
         }
     }
 
+    @Cacheable(value = "invoicesByUser", key = "#principal.getName()")
     public List<InvoiceDto> loadAllInvoicesForLoggedUser(Principal principal) {
         List<Invoice> invoices = invoiceRepository.findByUsername(principal.getName());
         return convertInvoicesToDtoList(invoices);

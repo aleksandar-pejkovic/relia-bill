@@ -224,9 +224,8 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
     }
 
-    private User encryptUserPassword(User user, String newPassword) {
+    private void encryptUserPassword(User user, String newPassword) {
         user.setPassword(passwordEncoder.encode(newPassword));
-        return user;
     }
 
     private void assignDefaultRoleToUser(User user) {

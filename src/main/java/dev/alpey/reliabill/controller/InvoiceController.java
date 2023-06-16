@@ -32,20 +32,20 @@ public class InvoiceController {
     }
 
     @PostMapping
-    public ResponseEntity<InvoiceDto> createInvoice(@Valid @RequestBody InvoiceDto invoiceDto) {
-        InvoiceDto createdInvoice = invoiceService.createInvoice(invoiceDto);
+    public ResponseEntity<InvoiceDto> createInvoice(@Valid @RequestBody InvoiceDto invoiceDto, Principal principal) {
+        InvoiceDto createdInvoice = invoiceService.createInvoice(invoiceDto, principal);
         return new ResponseEntity<>(createdInvoice, HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<InvoiceDto> updateInvoice(@Valid @RequestBody InvoiceDto invoiceDto) {
-        InvoiceDto updatedInvoice = invoiceService.updateInvoice(invoiceDto);
+    public ResponseEntity<InvoiceDto> updateInvoice(@Valid @RequestBody InvoiceDto invoiceDto, Principal principal) {
+        InvoiceDto updatedInvoice = invoiceService.updateInvoice(invoiceDto, principal);
         return new ResponseEntity<>(updatedInvoice, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteInvoice(@PathVariable Long id) {
-        invoiceService.deleteInvoice(id);
+    public String deleteInvoice(@PathVariable Long id, Principal principal) {
+        invoiceService.deleteInvoice(id, principal);
         return "Invoice delete!";
     }
 

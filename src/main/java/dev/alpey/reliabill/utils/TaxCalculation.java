@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import dev.alpey.reliabill.enums.TaxRate;
+import dev.alpey.reliabill.model.dto.finance.InvoiceTaxDetails;
 import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.model.entity.Item;
 
@@ -40,21 +41,11 @@ public final class TaxCalculation {
         item.setSubtotal(subtotal);
     }
 
-    public static void calculateTax(Invoice invoice) {
-        var total = invoice.getItems().stream()
-                .mapToDouble(Item::getTotal)
-                .sum();
-        invoice.setTotal(total);
+    public static InvoiceTaxDetails getInvoiceTaxDetails(Invoice invoice) {
         var tax = invoice.getItems().stream()
                 .mapToDouble(Item::getTax)
                 .sum();
-        invoice.setTax(tax);
-        var subtotal = total - tax;
-        invoice.setSubtotal(subtotal);
-        calculateTaxDetailsPerTaxRate(invoice);
-    }
-
-    private static void calculateTaxDetailsPerTaxRate(Invoice invoice) {
+        var subtotal = invoice.getTotal() - tax;
         var totalFor0 = getTaxAmountForRate(TaxRate.RATE_0, invoice);
         var totalFor10 = getTaxAmountForRate(TaxRate.RATE_10, invoice);
         var totalFor20 = invoice.getTotal() - totalFor10 - totalFor0;
@@ -69,15 +60,17 @@ public final class TaxCalculation {
                 .doubleValue();
         var subtotalFor20 = totalFor20 - taxFor20;
 
-        invoice.setTotalFor20(totalFor20);
-        invoice.setTaxFor20(taxFor20);
-        invoice.setSubtotalFor20(subtotalFor20);
-
-        invoice.setTotalFor10(totalFor10);
-        invoice.setTaxFor10(taxFor10);
-        invoice.setSubtotalFor10(subtotalFor10);
-
-        invoice.setTotalFor0(totalFor0);
+        return InvoiceTaxDetails.builder()
+                .totalFor20(totalFor20)
+                .totalFor10(totalFor10)
+                .totalFor0(totalFor0)
+                .tax(tax)
+                .taxFor20(taxFor20)
+                .taxFor10(taxFor10)
+                .subtotal(subtotal)
+                .subtotalFor20(subtotalFor20)
+                .subtotalFor10(subtotalFor10)
+                .build();
     }
 
     private static double getTaxAmountForRate(TaxRate taxRate, Invoice invoice) {

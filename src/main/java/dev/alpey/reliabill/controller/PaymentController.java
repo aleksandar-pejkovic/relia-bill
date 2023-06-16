@@ -40,6 +40,11 @@ public class PaymentController {
         return paymentService.loadPaymentByInvoiceId(invoiceId);
     }
 
+    @GetMapping("/companyId/{companyId}")
+    public List<PaymentDto> fetchPaymentsByCompanyId(@PathVariable Long companyId) {
+        return paymentService.loadPaymentsByCompany(companyId);
+    }
+
     @DeleteMapping("/{paymentId}")
     public String deletePayment(@PathVariable Long paymentId) {
         paymentService.deletePayment(paymentId);

@@ -1,6 +1,7 @@
 package dev.alpey.reliabill.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import dev.alpey.reliabill.configuration.exceptions.invoice.InvoiceNotFoundExcep
 import dev.alpey.reliabill.model.dto.PaymentDto;
 import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.model.entity.Payment;
+import dev.alpey.reliabill.repository.CompanyRepository;
 import dev.alpey.reliabill.repository.InvoiceRepository;
 import dev.alpey.reliabill.repository.PaymentRepository;
 
@@ -28,11 +30,13 @@ public class PaymentService {
 
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private CompanyRepository companyRepository;
 
     public PaymentDto createPayment(PaymentDto paymentDto) {
         Payment payment = modelMapper.map(paymentDto, Payment.class);
-        Optional<Invoice> optionalInvoice = invoiceRepository.findById(paymentDto.getInvoiceId());
-        Invoice invoice = optionalInvoice.orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
+        Invoice invoice = invoiceRepository.findById(paymentDto.getInvoiceId())
+                .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
         payment.setInvoice(invoice);
         payment.setPaymentDate(LocalDateTime.now());
         Payment savedPayment = paymentRepository.save(payment);
@@ -49,6 +53,20 @@ public class PaymentService {
         return paymentRepository.findByInvoiceId(invoiceId).stream()
                 .map(this::convertPaymentToDto)
                 .collect(Collectors.toList());
+    }
+
+    public List<PaymentDto> loadPaymentsByCompany(Long companyId) {
+        List<Payment> payments = new ArrayList<>();
+        companyRepository.findById(companyId)
+                .ifPresent(company -> {
+                    company.getInvoices()
+                            .forEach(invoice -> {
+                                payments.addAll(invoice.getPayments());
+                            });
+                });
+        return payments.stream()
+                .map(this::convertPaymentToDto)
+                .toList();
     }
 
     public void deletePayment(Long paymentId) {

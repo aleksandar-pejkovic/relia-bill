@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.invoice.InvoiceNotFoundException;
 import dev.alpey.reliabill.model.dto.PaymentDto;
+import dev.alpey.reliabill.model.entity.Company;
 import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.model.entity.Payment;
 import dev.alpey.reliabill.repository.CompanyRepository;
@@ -30,6 +30,7 @@ public class PaymentService {
 
     @Autowired
     private ModelMapper modelMapper;
+
     @Autowired
     private CompanyRepository companyRepository;
 
@@ -44,8 +45,7 @@ public class PaymentService {
     }
 
     public PaymentDto loadPaymentById(Long id) {
-        Optional<Payment> optionalPayment = paymentRepository.findById(id);
-        Payment payment = optionalPayment.orElseThrow();
+        Payment payment = paymentRepository.findById(id).orElseThrow();
         return convertPaymentToDto(payment);
     }
 
@@ -55,7 +55,7 @@ public class PaymentService {
                 .collect(Collectors.toList());
     }
 
-    public List<PaymentDto> loadPaymentsByCompany(Long companyId) {
+    public List<PaymentDto> loadPaymentsByCompanyId(Long companyId) {
         List<Payment> payments = new ArrayList<>();
         companyRepository.findById(companyId)
                 .ifPresent(company -> {
@@ -67,6 +67,17 @@ public class PaymentService {
         return payments.stream()
                 .map(this::convertPaymentToDto)
                 .toList();
+    }
+
+    public Double calculatePaymentsAmountByCompany(Company company) {
+        List<Payment> payments = new ArrayList<>();
+        company.getInvoices()
+                .forEach(invoice -> {
+                    payments.addAll(invoice.getPayments());
+                });
+        return payments.stream()
+                .mapToDouble(Payment::getAmount)
+                .sum();
     }
 
     public void deletePayment(Long paymentId) {

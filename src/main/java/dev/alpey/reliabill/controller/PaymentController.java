@@ -42,7 +42,7 @@ public class PaymentController {
 
     @GetMapping("/companyId/{companyId}")
     public List<PaymentDto> fetchPaymentsByCompanyId(@PathVariable Long companyId) {
-        return paymentService.loadPaymentsByCompany(companyId);
+        return paymentService.loadPaymentsByCompanyId(companyId);
     }
 
     @DeleteMapping("/{paymentId}")

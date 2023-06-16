@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 import dev.alpey.reliabill.configuration.exceptions.company.CompanyNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UserNotFoundException;
 import dev.alpey.reliabill.model.dto.CompanyDto;
+import dev.alpey.reliabill.model.dto.finance.CompanyBalanceDetails;
 import dev.alpey.reliabill.model.entity.Company;
+import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.model.entity.User;
 import dev.alpey.reliabill.repository.CompanyRepository;
 import dev.alpey.reliabill.repository.UserRepository;
@@ -33,6 +36,9 @@ public class CompanyService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private PaymentService paymentService;
+
     public List<CompanyDto> searchCompanies(String searchTerm, Principal principal) {
         return companyRepository.searchByName(searchTerm).stream()
                 .filter(company -> company.getUser().getUsername().equals(principal.getName()))
@@ -40,7 +46,7 @@ public class CompanyService {
                 .collect(Collectors.toList());
     }
 
-    @CacheEvict(value = "ownCompany", key = "#principal.getName()")
+    @CachePut(value = "ownCompany", key = "#principal.getName()")
     public CompanyDto createOwnCompany(CompanyDto companyDto, Principal principal) {
         Optional<User> optionalUser = userRepository.findByUsername(principal.getName());
         User loggedUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
@@ -73,7 +79,10 @@ public class CompanyService {
         return convertCompanyToDto(updatedCompany);
     }
 
-    @CacheEvict(value = "companiesByUser", key = "#principal.getName()")
+    @Caching(evict = {
+            @CacheEvict(value = "companiesByUser", key = "#principal.getName()"),
+            @CacheEvict(value = "ownCompany", key = "#principal.getName()")
+    })
     public void deleteCompany(Long id, Principal principal) {
         if (companyRepository.existsById(id)) {
             companyRepository.deleteById(id);
@@ -111,6 +120,29 @@ public class CompanyService {
     public List<CompanyDto> loadAllCompanies() {
         List<Company> companies = companyRepository.findAll();
         return convertCompaniesToDtoList(companies);
+    }
+
+    public CompanyBalanceDetails loadCompanyBalance(Long id) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+
+        double totalRevenue = calculateTotalRevenue(company);
+        double totalPayments = paymentService.calculatePaymentsAmountByCompany(company);
+        double totalDebt = totalRevenue - totalPayments;
+
+        return CompanyBalanceDetails.builder()
+                .totalRevenue(totalRevenue)
+                .totalPayments(totalPayments)
+                .totalDebt(totalDebt)
+                .build();
+    }
+
+    public Double calculateTotalRevenue(Company company) {
+        return company
+                .getInvoices()
+                .stream()
+                .mapToDouble(Invoice::getTotal)
+                .sum();
     }
 
     private List<CompanyDto> convertCompaniesToDtoList(List<Company> companies) {

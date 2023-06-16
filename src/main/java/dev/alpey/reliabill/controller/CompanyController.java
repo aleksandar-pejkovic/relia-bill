@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.alpey.reliabill.model.dto.CompanyDto;
+import dev.alpey.reliabill.model.dto.finance.CompanyBalanceDetails;
 import dev.alpey.reliabill.service.CompanyService;
 import jakarta.validation.Valid;
 
@@ -76,5 +77,10 @@ public class CompanyController {
     @GetMapping("/all")
     public List<CompanyDto> getAllCompanies() {
         return companyService.loadAllCompanies();
+    }
+
+    @GetMapping("/{id}/balance")
+    public CompanyBalanceDetails fetchCompanyBalance(@PathVariable Long id) {
+        return companyService.loadCompanyBalance(id);
     }
 }

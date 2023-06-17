@@ -50,14 +50,10 @@ public final class TaxCalculation {
         var totalFor10 = getTaxAmountForRate(TaxRate.RATE_10, invoice);
         var totalFor20 = invoice.getTotal() - totalFor10 - totalFor0;
 
-        var taxFor10 = BigDecimal.valueOf(totalFor10).multiply(BigDecimal.valueOf(LOWER_PRECALCULATED_TAX_RATE))
-                .setScale(2, RoundingMode.HALF_EVEN)
-                .doubleValue();
+        var taxFor10 = getTaxForTaxRate(totalFor10, LOWER_PRECALCULATED_TAX_RATE);
         var subtotalFor10 = totalFor10 - taxFor10;
 
-        var taxFor20 = BigDecimal.valueOf(totalFor20).multiply(BigDecimal.valueOf(HIGHER_PRECALCULATED_TAX_RATE))
-                .setScale(2, RoundingMode.HALF_EVEN)
-                .doubleValue();
+        var taxFor20 = getTaxForTaxRate(totalFor20, HIGHER_PRECALCULATED_TAX_RATE);
         var subtotalFor20 = totalFor20 - taxFor20;
 
         return InvoiceTaxDetails.builder()
@@ -71,6 +67,12 @@ public final class TaxCalculation {
                 .subtotalFor20(subtotalFor20)
                 .subtotalFor10(subtotalFor10)
                 .build();
+    }
+
+    private static double getTaxForTaxRate(double totalForTaxRate, double precalculatedTaxRate) {
+        return BigDecimal.valueOf(totalForTaxRate).multiply(BigDecimal.valueOf(precalculatedTaxRate))
+                .setScale(2, RoundingMode.HALF_EVEN)
+                .doubleValue();
     }
 
     private static double getTaxAmountForRate(TaxRate taxRate, Invoice invoice) {

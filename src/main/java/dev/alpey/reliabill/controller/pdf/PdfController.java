@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.itextpdf.text.DocumentException;
 
+import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.repository.InvoiceRepository;
+import dev.alpey.reliabill.service.email.EmailService;
 import dev.alpey.reliabill.service.pdf.PdfService;
+import jakarta.mail.MessagingException;
 
 @RestController
 @RequestMapping("/api/pdf")
@@ -28,22 +31,40 @@ public class PdfController {
     private PdfService pdfService;
 
     @Autowired
+    private EmailService emailService;
+
+    @Autowired
     private InvoiceRepository invoiceRepository;
 
     @GetMapping("/invoice/{id}")
     public ResponseEntity<InputStreamResource> getInvoicePdf(@PathVariable Long id, Principal principal)
-            throws IOException, DocumentException {
-        // Create input stream from PDF document
+            throws DocumentException {
+
         InputStream inputStream = pdfService.generateInvoicePdf(principal.getName(), id);
         InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
 
         String invoiceNumber = invoiceRepository.findInvoiceNumberById(id);
-        // Return input stream as a response
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDisposition(ContentDisposition.attachment().filename(invoiceNumber + ".pdf").build());
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(inputStreamResource);
+    }
+
+    @GetMapping("/invoice/{id}/send")
+    public ResponseEntity<String> sendInvoiceToClient(@PathVariable Long id, Principal principal)
+            throws DocumentException, MessagingException, IOException {
+
+        InputStream inputStream = pdfService.generateInvoicePdf(principal.getName(), id);
+
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow();
+
+        emailService.sendInvoiceEmailToClient(invoice, inputStream, principal);
+
+        return ResponseEntity.ok()
+                .body("Invoice sent to client.");
     }
 }

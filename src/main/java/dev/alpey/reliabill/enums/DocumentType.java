@@ -2,8 +2,8 @@ package dev.alpey.reliabill.enums;
 
 public enum DocumentType {
 
-    INVOICE("Invoice"),
-    ESTIMATE("Estimate");
+    INVOICE("Faktura"),
+    ESTIMATE("Profaktura");
 
     private final String type;
 

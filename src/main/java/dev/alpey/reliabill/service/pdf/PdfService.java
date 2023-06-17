@@ -98,7 +98,7 @@ public class PdfService {
                         """,
                 """
                         User %s with username %s generated an invoice %s.
-                        Invoice total is %s.
+                        Invoice total is: %s.
                         Local time: %s.
                         """.formatted(
                         user.getName(),
@@ -209,9 +209,9 @@ public class PdfService {
 
     private static Paragraph getHeading(Invoice invoice) {
         DocumentType documentType = invoice.getDocumentType();
-        String documentTypeToSerbian = documentType.equals(DocumentType.INVOICE) ? "Faktura" : "Profaktura";
+
         Paragraph heading = new Paragraph(
-                documentTypeToSerbian + " " + invoice.getInvoiceNumber(), LARGE_FONT);
+                documentType.getType() + " " + invoice.getInvoiceNumber(), LARGE_FONT);
         heading.setAlignment(Element.ALIGN_LEFT);
 
         PdfPTable dateTable = new PdfPTable(DATE_COLUMNS);

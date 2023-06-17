@@ -133,11 +133,14 @@ public class UserService {
         createPasswordResetTokenForUser(user, token);
         emailService.sendEmail(
                 user.getEmail(),
-                "Password reset",
+                "Password reset token",
                 """
+                        Hello %s!
                         Please click the following link to reset your password:
                         %s
-                        """.formatted(resetLink)
+                        """.formatted(
+                        user.getUsername(),
+                        resetLink)
         );
     }
 

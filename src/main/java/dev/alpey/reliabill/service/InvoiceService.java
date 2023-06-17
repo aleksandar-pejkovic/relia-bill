@@ -48,6 +48,7 @@ public class InvoiceService {
         invoice.setInvoiceStatus(InvoiceStatus.valueOf(invoiceDto.getInvoiceStatus()));
         invoice.setDocumentType(DocumentType.valueOf(invoiceDto.getDocumentType()));
         invoice.setCompany(company);
+        invoice.setTotal(0.0);
         Invoice savedInvoice = invoiceRepository.save(invoice);
         return convertInvoiceToDto(savedInvoice);
     }

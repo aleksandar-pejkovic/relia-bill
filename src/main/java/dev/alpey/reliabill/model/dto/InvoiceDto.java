@@ -35,23 +35,5 @@ public class InvoiceDto {
 
     private Double total;
 
-    private Double tax;
-
-    private Double subtotal;
-
-    private Double totalFor20;
-
-    private Double taxFor20;
-
-    private Double subtotalFor20;
-
-    private Double totalFor10;
-
-    private Double taxFor10;
-
-    private Double subtotalFor10;
-
-    private Double totalFor0;
-
     private Long companyId;
 }

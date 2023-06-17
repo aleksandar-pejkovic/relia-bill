@@ -59,13 +59,15 @@ public class PdfService {
     public static final int ALIGN_RIGHT = Element.ALIGN_RIGHT;
     public static final int ALIGN_LEFT = Element.ALIGN_LEFT;
 
+    public static final int SMALL_FONT_SIZE = 7;
     public static final int DEFAULT_FONT_SIZE = 8;
     public static final int LARGE_FONT_SIZE = 16;
 
     public static final Font BOLD_FONT = new Font(Font.FontFamily.HELVETICA, DEFAULT_FONT_SIZE, Font.BOLD);
     public static final Font DEFAULT_FONT = new Font(Font.FontFamily.HELVETICA, DEFAULT_FONT_SIZE, Font.NORMAL);
     public static final Font LARGE_FONT = new Font(Font.FontFamily.HELVETICA, LARGE_FONT_SIZE, Font.BOLD);
-    public static final Font SMALL_FONT = new Font(Font.FontFamily.HELVETICA, 7, Font.NORMAL, BaseColor.GRAY);
+    public static final Font SMALL_FONT = new Font(Font.FontFamily.HELVETICA, SMALL_FONT_SIZE, Font.NORMAL,
+            BaseColor.GRAY);
 
     public static final DecimalFormat TWO_DECIMALS_FORMAT = new DecimalFormat("#,##0.00");
 

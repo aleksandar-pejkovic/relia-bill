@@ -113,7 +113,12 @@ public class EmailService {
 
                                 PDF dokument se nalazi u prilogu ovog mejla.
 
-                                Srdačan pozdrav!
+                                S poštovanjem,
+                                %s
+                                %s
+                                %s
+                                %s
+                                %s
                                 %s
 
                                 P.S Pošiljaoca možete kontaktirati klikom na "Reply"
@@ -124,7 +129,12 @@ public class EmailService {
                 invoice.getInvoiceNumber(),
                 formattedDate,
                 invoice.getTotal(),
-                usersCompany.getName()
+                usersCompany.getName(),
+                usersCompany.getStreet(),
+                usersCompany.getZip() + " " + usersCompany.getCity(),
+                usersCompany.getPhone(),
+                usersCompany.getEmail(),
+                usersCompany.getWebsite()
         );
 
         helper.setFrom(usersCompany.getEmail());

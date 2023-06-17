@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -67,8 +66,8 @@ public class ProductService {
 
     @CacheEvict(value = "productsByUser", key = "#principal.getName()")
     public ProductDto updateProduct(ProductDto productDto, Principal principal) {
-        Optional<Product> optionalProduct = productRepository.findById(productDto.getId());
-        Product storedProduct = optionalProduct.orElseThrow(() -> new ProductNotFoundException("Product not found!"));
+        Product storedProduct = productRepository.findById(productDto.getId())
+                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
         storedProduct.setTaxRate(TaxRate.fromRate(productDto.getTaxRate()));
         modelMapper.map(productDto, storedProduct);
         Product updatedProduct = productRepository.save(storedProduct);

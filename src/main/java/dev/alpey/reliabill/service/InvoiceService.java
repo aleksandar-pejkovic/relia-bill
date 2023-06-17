@@ -3,7 +3,6 @@ package dev.alpey.reliabill.service;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -43,8 +42,8 @@ public class InvoiceService {
 
     @CacheEvict(value = "invoicesByUser", key = "#principal.getName()")
     public InvoiceDto createInvoice(InvoiceDto invoiceDto, Principal principal) {
-        Optional<Company> optionalCompany = companyRepository.findById(invoiceDto.getCompanyId());
-        Company company = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Invalid company!"));
+        Company company = companyRepository.findById(invoiceDto.getCompanyId())
+                .orElseThrow(() -> new CompanyNotFoundException("Invalid company!"));
         Invoice invoice = modelMapper.map(invoiceDto, Invoice.class);
         invoice.setInvoiceStatus(InvoiceStatus.valueOf(invoiceDto.getInvoiceStatus()));
         invoice.setDocumentType(DocumentType.valueOf(invoiceDto.getDocumentType()));
@@ -55,8 +54,8 @@ public class InvoiceService {
 
     @CacheEvict(value = "invoicesByUser", key = "#principal.getName()")
     public InvoiceDto updateInvoice(InvoiceDto invoiceDto, Principal principal) {
-        Optional<Invoice> optionalInvoice = invoiceRepository.findById(invoiceDto.getId());
-        Invoice invoice = optionalInvoice.orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
+        Invoice invoice = invoiceRepository.findById(invoiceDto.getId())
+                .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
         modelMapper.map(invoiceDto, invoice);
         invoice.setInvoiceStatus(InvoiceStatus.valueOf(invoiceDto.getInvoiceStatus()));
         invoice.setDocumentType(DocumentType.valueOf(invoiceDto.getDocumentType()));
@@ -81,8 +80,8 @@ public class InvoiceService {
     }
 
     public List<InvoiceDto> loadAllInvoicesForCompany(Long companyId) {
-        Optional<Company> optionalCompany = companyRepository.findById(companyId);
-        Company company = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
         List<Invoice> invoices = invoiceRepository.findByCompany(company);
         return convertInvoicesToDtoList(invoices);
     }

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -113,8 +112,8 @@ public class UserService {
 
     @CachePut(value = "usersByUsername", key = "#userDto.username")
     public UserDto updateUser(UserDto userDto) {
-        Optional<User> optionalUser = userRepository.findByUsername(userDto.getUsername());
-        User currentUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
+        User currentUser = userRepository.findByUsername(userDto.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
         if (!currentUser.getEmail().equals(userDto.getEmail())
                 && userRepository.existsByEmail(userDto.getEmail())) {
             throw new EmailExistsException("Account with email '" + userDto.getEmail() + "' already exist");
@@ -169,8 +168,8 @@ public class UserService {
     }
 
     public UserDto grantAdminRoleToUser(String username) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        User currentUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
         currentUser.getRoles().add(roleRepository.findByName(RoleName.ADMIN));
         User adminUser = userRepository.save(currentUser);
         return convertUserToDto(adminUser);
@@ -182,15 +181,14 @@ public class UserService {
             @CacheEvict(value = "usersByUsername", key = "#username"),
             @CacheEvict(value = "productsByUser", key = "#username")})
     public void deleteUser(String username) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException("User not found!");
-        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+
         List<Product> usersProducts = productRepository.findByUsername(username);
         if (!usersProducts.isEmpty()) {
             productRepository.deleteAll(usersProducts);
         }
-        userRepository.deleteById(optionalUser.get().getId());
+        userRepository.deleteById(user.getId());
     }
 
     public List<UserDto> loadAllUsers() {

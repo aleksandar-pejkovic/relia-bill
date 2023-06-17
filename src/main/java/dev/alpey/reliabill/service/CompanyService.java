@@ -3,7 +3,6 @@ package dev.alpey.reliabill.service;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -48,8 +47,8 @@ public class CompanyService {
 
     @CachePut(value = "ownCompany", key = "#principal.getName()")
     public CompanyDto createOwnCompany(CompanyDto companyDto, Principal principal) {
-        Optional<User> optionalUser = userRepository.findByUsername(principal.getName());
-        User loggedUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
+        User loggedUser = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
         Company ownCompany = modelMapper.map(companyDto, Company.class);
         Company storedCompany = companyRepository.save(ownCompany);
         loggedUser.setCompanyId(storedCompany.getId());
@@ -59,8 +58,8 @@ public class CompanyService {
 
     @CacheEvict(value = "companiesByUser", key = "#principal.getName()")
     public CompanyDto createClientCompany(CompanyDto companyDto, Principal principal) {
-        Optional<User> optionalUser = userRepository.findByUsername(principal.getName());
-        User loggedUser = optionalUser.orElseThrow(() -> new UserNotFoundException("User not found!"));
+        User loggedUser = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
         Company clientCompany = modelMapper.map(companyDto, Company.class);
         clientCompany.setUser(loggedUser);
         Company savedCompany = companyRepository.save(clientCompany);
@@ -72,8 +71,8 @@ public class CompanyService {
             @CacheEvict(value = "companiesByUser", key = "#principal.getName()")
     })
     public CompanyDto updateCompany(CompanyDto companyDto, Principal principal) {
-        Optional<Company> optionalCompany = companyRepository.findById(companyDto.getId());
-        Company storedCompany = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+        Company storedCompany = companyRepository.findById(companyDto.getId())
+                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
         modelMapper.map(companyDto, storedCompany);
         Company updatedCompany = companyRepository.save(storedCompany);
         return convertCompanyToDto(updatedCompany);
@@ -106,14 +105,14 @@ public class CompanyService {
         if (user.getCompanyId() == null) {
             throw new CompanyNotFoundException("Company not found!");
         }
-        Optional<Company> optionalCompany = companyRepository.findById(user.getCompanyId());
-        Company company = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+        Company company = companyRepository.findById(user.getCompanyId())
+                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
         return convertCompanyToDto(company);
     }
 
     public CompanyDto loadCompanyById(Long id) {
-        Optional<Company> optionalCompany = companyRepository.findById(id);
-        Company company = optionalCompany.orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
         return convertCompanyToDto(company);
     }
 
@@ -126,7 +125,7 @@ public class CompanyService {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
 
-        double totalRevenue = calculateTotalRevenue(company);
+        double totalRevenue = calculateTotalRevenueForCompany(company);
         double totalPayments = paymentService.calculatePaymentsAmountByCompany(company);
         double totalDebt = totalRevenue - totalPayments;
 
@@ -137,7 +136,7 @@ public class CompanyService {
                 .build();
     }
 
-    public Double calculateTotalRevenue(Company company) {
+    private Double calculateTotalRevenueForCompany(Company company) {
         return company
                 .getInvoices()
                 .stream()

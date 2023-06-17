@@ -4,13 +4,13 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.invoice.InvoiceNotFoundException;
@@ -34,7 +34,10 @@ public class ItemService {
     @Autowired
     private ModelMapper modelMapper;
 
-    @CacheEvict(value = "itemsByUser", key = "#principal.getName()")
+    @Caching(evict = {
+            @CacheEvict(value = "invoicesByUser", key = "#principal.getName()"),
+            @CacheEvict(value = "itemsByUser", key = "#principal.getName()")
+    })
     public ItemDto createItem(ItemDto itemDto, Principal principal) {
         Invoice invoice = invoiceRepository.findById(itemDto.getInvoiceId())
                 .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
@@ -47,7 +50,10 @@ public class ItemService {
         return convertItemToDto(savedItem);
     }
 
-    @CacheEvict(value = "itemsByUser", key = "#principal.getName()")
+    @Caching(evict = {
+            @CacheEvict(value = "invoicesByUser", key = "#principal.getName()"),
+            @CacheEvict(value = "itemsByUser", key = "#principal.getName()")
+    })
     public void deleteItem(Long id, Principal principal) {
         Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("Item not found!"));
 
@@ -61,8 +67,8 @@ public class ItemService {
     }
 
     public ItemDto loadItemById(Long id) {
-        Optional<Item> optionalItem = itemRepository.findById(id);
-        Item item = optionalItem.orElseThrow(() -> new NoSuchElementException("Item not found!"));
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Item not found!"));
         return convertItemToDto(item);
     }
 

@@ -25,17 +25,11 @@ public final class TaxCalculation {
         double precalculatedTaxRate = calculatePrecalculatedTaxRate(item.getTaxRate().getRate());
         var price = item.getPrice();
         var quantity = item.getQuantity();
-        var preTax = BigDecimal.valueOf(price - (price * precalculatedTaxRate))
-                .setScale(2, RoundingMode.HALF_EVEN)
-                .doubleValue();
+        var preTax = calculateItemPreTax(precalculatedTaxRate, price);
         item.setPreTax(preTax);
-        var total = BigDecimal.valueOf(quantity * price)
-                .setScale(2, RoundingMode.HALF_EVEN)
-                .doubleValue();
+        var total = calculateItemTotal(price, quantity);
         item.setTotal(total);
-        var tax = BigDecimal.valueOf(total).multiply(BigDecimal.valueOf(precalculatedTaxRate))
-                .setScale(2, RoundingMode.HALF_EVEN)
-                .doubleValue();
+        var tax = calculateTax(precalculatedTaxRate, total);
         item.setTax(tax);
         var subtotal = total - tax;
         item.setSubtotal(subtotal);
@@ -46,14 +40,14 @@ public final class TaxCalculation {
                 .mapToDouble(Item::getTax)
                 .sum();
         var subtotal = invoice.getTotal() - tax;
-        var totalFor0 = getTaxAmountForRate(TaxRate.RATE_0, invoice);
-        var totalFor10 = getTaxAmountForRate(TaxRate.RATE_10, invoice);
+        var totalFor0 = calculateTaxAmountForTaxRate(TaxRate.RATE_0, invoice);
+        var totalFor10 = calculateTaxAmountForTaxRate(TaxRate.RATE_10, invoice);
         var totalFor20 = invoice.getTotal() - totalFor10 - totalFor0;
 
-        var taxFor10 = getTaxForTaxRate(totalFor10, LOWER_PRECALCULATED_TAX_RATE);
+        var taxFor10 = calculateTax(totalFor10, LOWER_PRECALCULATED_TAX_RATE);
         var subtotalFor10 = totalFor10 - taxFor10;
 
-        var taxFor20 = getTaxForTaxRate(totalFor20, HIGHER_PRECALCULATED_TAX_RATE);
+        var taxFor20 = calculateTax(totalFor20, HIGHER_PRECALCULATED_TAX_RATE);
         var subtotalFor20 = totalFor20 - taxFor20;
 
         return InvoiceTaxDetails.builder()
@@ -69,13 +63,25 @@ public final class TaxCalculation {
                 .build();
     }
 
-    private static double getTaxForTaxRate(double totalForTaxRate, double precalculatedTaxRate) {
-        return BigDecimal.valueOf(totalForTaxRate).multiply(BigDecimal.valueOf(precalculatedTaxRate))
+    private static double calculateTax(double precalculatedTaxRate, double total) {
+        return BigDecimal.valueOf(total).multiply(BigDecimal.valueOf(precalculatedTaxRate))
                 .setScale(2, RoundingMode.HALF_EVEN)
                 .doubleValue();
     }
 
-    private static double getTaxAmountForRate(TaxRate taxRate, Invoice invoice) {
+    private static double calculateItemTotal(Double price, Double quantity) {
+        return BigDecimal.valueOf(quantity * price)
+                .setScale(2, RoundingMode.HALF_EVEN)
+                .doubleValue();
+    }
+
+    private static double calculateItemPreTax(double precalculatedTaxRate, Double price) {
+        return BigDecimal.valueOf(price - (price * precalculatedTaxRate))
+                .setScale(2, RoundingMode.HALF_EVEN)
+                .doubleValue();
+    }
+
+    private static double calculateTaxAmountForTaxRate(TaxRate taxRate, Invoice invoice) {
         return invoice.getItems().stream()
                 .filter(item -> item.getTaxRate() == taxRate)
                 .mapToDouble(Item::getTotal)

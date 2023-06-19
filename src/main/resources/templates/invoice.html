@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="sr" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${invoice.documentType.getType() + ' ' + invoice.invoiceNumber}">Invoice PDF</title>
+    <link rel="stylesheet" th:href="@{~/css/invoice.css}"/>
+    <style>
+        body {
+            font-family: "DejaVu Sans";
+            font-size: 10px;
+        }
+        .user-company {
+            right: 0px;
+            text-align: right;
+            letter-spacing: 5px;
+        }
+        .client-company {
+            width: 40%;
+            left: 0px;
+            padding: 10px;
+            text-align: left;
+            border-radius: 5px;
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+        .invoice-details::after {
+          content: "";
+          display: table;
+          clear: both;
+        }
+        .creation-date {
+          float: left;
+          width: 33.33%;
+          text-align: left;
+        }
+        .due-date {
+          float: left;
+          width: 33.33%;
+          text-align: center;
+        }
+        .location {
+          float: right;
+          width: 33.33%;
+          text-align: right;
+        }
+
+        .table th {
+          background-color: darkslateblue;
+          text-align: center;
+          padding: 6px;
+          font-weight: bold;
+          color: wheat;
+          border-bottom: 1px solid #ddd;
+        }
+        .table td {
+          padding: 4px;
+          border-bottom: 1px solid #ddd;
+          text-align: right;
+        }
+        .table tr:hover {
+          background-color: #aaaaaa;
+        }
+
+        .items-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 5px;
+        }
+        .items-table td:nth-child(2) {
+          text-align: left;
+        }
+        .items-table td:first-child,
+        .items-table td:nth-child(5) {
+          text-align: center;
+        }
+
+        .total-table {
+          margin-top: 5px;
+          float: right;
+          border-collapse: collapse;
+        }
+        .total-table td {
+          border: none;
+          padding: 2px;
+        }
+
+        @media print {
+          @page {
+            size: A4;
+            margin: 0;
+          }
+        }
+
+
+
+    </style>
+</head>
+
+<body>
+<div class="user-company">
+    <div style="font-size: 14px" th:text="${userCompany.name}">Company Name</div>
+    <div th:text="${userCompany.street}">Company Street</div>
+    <div th:text="${userCompany.city}">Company City</div>
+    <div th:text="${userCompany.registrationNumber}">Company Registration Number</div>
+    <div th:text="${userCompany.taxNumber}">Company Tax Number</div>
+    <div th:text="${userCompany.phone}">Company Phone</div>
+    <div th:text="${userCompany.email}">Company Email</div>
+    <div th:text="${userCompany.bankAccount}">Company Bank Account</div>
+</div>
+<h4>Klijent</h4>
+<div class="client-company">
+    <div style="font-size: 14px" th:text="${clientCompany.name}">Client Name</div>
+    <div th:text="${clientCompany.street}">Client Street</div>
+    <div th:text="${clientCompany.city}">Client City</div>
+    <div th:text="${clientCompany.registrationNumber}">Client Registration Number</div>
+    <div th:text="${clientCompany.taxNumber}">Client Tax Number</div>
+    <div th:text="${clientCompany.phone}">Client Phone</div>
+    <div th:text="${clientCompany.email}">Client Email</div>
+    <div th:text="${clientCompany.bankAccount}">Client Bank Account</div>
+</div>
+<h1 th:text="${invoice.documentType.getType()} + ' ' + ${invoice.invoiceNumber}">Invoice Information</h1>
+<div class="invoice-details">
+    <div class="creation-date" th:text="'Datum izdavanja: ' + ${invoice.creationDate}"></div>
+    <div class="due-date" th:text="'Datum dospeća: ' + ${invoice.dueDate}"></div>
+    <div class="location" th:text="'Mesto izdavanja: ' + ${userCompany.city}"></div>
+</div>
+<table class="table items-table">
+    <tr>
+        <th>#</th>
+        <th>Artikal</th>
+        <th>Količina</th>
+        <th>Cena</th>
+        <th>PDV %</th>
+        <th>Cena bez PDV-a</th>
+        <th>Iznos sa PDV-om</th>
+        <th>Iznos bez PDV-a</th>
+    </tr>
+    <tr th:each="item, itemStat : ${items}">
+        <td th:text="${itemStat.count}">Item Count</td>
+        <td th:text="${item.productName}">Item Name</td>
+        <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(item.quantity)}">Item Quantity</td>
+        <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(item.price)}">Item Unit Price</td>
+        <td th:text="${item.taxRate.getRate()}">0</td>
+        <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(item.preTax)}">0.00</td>
+        <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(item.total)}">0.00</td>
+        <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(item.subtotal)}">0.00</td>
+    </tr>
+</table>
+<table class="table total-table">
+    <tr>
+        <td>Ukupno</td>
+        <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(invoiceTaxDetails.subtotal)}">Pre Tax
+            Amount
+        </td>
+    </tr>
+    <tr>
+        <td>PDV</td>
+        <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(invoiceTaxDetails.tax)}">Tax Amount</td>
+    </tr>
+    <tr>
+        <td>Za plaćanje</td>
+        <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(invoice.total)}">Total Amount</td>
+    </tr>
+</table>
+</body>
+
+</html>

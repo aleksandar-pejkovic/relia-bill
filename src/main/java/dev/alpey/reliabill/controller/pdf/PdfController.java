@@ -1,6 +1,5 @@
 package dev.alpey.reliabill.controller.pdf;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
 
@@ -15,13 +14,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.itextpdf.text.DocumentException;
+import com.lowagie.text.DocumentException;
 
 import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.repository.InvoiceRepository;
 import dev.alpey.reliabill.service.email.EmailService;
 import dev.alpey.reliabill.service.pdf.PdfService;
-import jakarta.mail.MessagingException;
 
 @RestController
 @RequestMapping("/api/pdf")
@@ -38,7 +36,7 @@ public class PdfController {
 
     @GetMapping("/invoice/{id}")
     public ResponseEntity<InputStreamResource> getInvoicePdf(@PathVariable Long id, Principal principal)
-            throws DocumentException {
+            throws DocumentException, Exception {
 
         InputStream inputStream = pdfService.generateInvoicePdf(principal.getName(), id);
         InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
@@ -55,7 +53,7 @@ public class PdfController {
 
     @GetMapping("/invoice/{id}/send")
     public ResponseEntity<String> sendInvoiceToClient(@PathVariable Long id, Principal principal)
-            throws DocumentException, MessagingException, IOException {
+            throws DocumentException, Exception {
 
         InputStream inputStream = pdfService.generateInvoicePdf(principal.getName(), id);
 

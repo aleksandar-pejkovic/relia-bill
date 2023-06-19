@@ -1,7 +1,9 @@
 package dev.alpey.reliabill.model.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import dev.alpey.reliabill.enums.DocumentType;
@@ -54,7 +56,7 @@ public class Invoice {
     private Company company;
 
     @OneToMany(mappedBy = "invoice")
-    private Set<Item> items = new HashSet<>();
+    private List<Item> items = new ArrayList<>();
 
     @OneToMany(mappedBy = "invoice")
     private Set<Payment> payments = new HashSet<>();

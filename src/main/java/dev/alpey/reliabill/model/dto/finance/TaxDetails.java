@@ -1,16 +1,14 @@
 package dev.alpey.reliabill.model.dto.finance;
 
-import java.util.List;
-
 import lombok.Builder;
 import lombok.Getter;
 
 @Builder
 @Getter
-public class InvoiceTaxDetails {
+public class TaxDetails {
 
-    private Double tax;
+    private int taxRate;
     private Double subtotal;
-
-    List<TaxDetails> taxDetailsList;
+    private Double tax;
+    private Double total;
 }

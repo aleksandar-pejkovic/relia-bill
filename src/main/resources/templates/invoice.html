@@ -8,8 +8,12 @@
     <link rel="stylesheet" th:href="@{~/css/invoice.css}"/>
     <style>
         body {
+            box-sizing:border-box;
             font-family: "DejaVu Sans";
             font-size: 10px;
+            display: flex;
+            justify-content: space-between;
+            flex-direction: column;
         }
         .user-company {
             right: 0px;
@@ -78,12 +82,21 @@
 
         .total-table {
           margin-top: 5px;
-          float: right;
+          margin-left: auto;
           border-collapse: collapse;
         }
         .total-table td {
           border: none;
           padding: 2px;
+        }
+
+        .tax-table {
+          width: 100%;
+          margin-top: 5px;
+          border-collapse: collapse;
+        }
+        .tax-table td {
+          text-align: center;
         }
 
         @media print {
@@ -92,7 +105,6 @@
             margin: 0;
           }
         }
-
 
 
     </style>
@@ -162,6 +174,20 @@
     <tr>
         <td>Za plaćanje</td>
         <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(invoice.total)}">Total Amount</td>
+    </tr>
+</table>
+<table class="table tax-table">
+    <tr>
+        <th>Poreska stopa</th>
+        <th>Osnova</th>
+        <th>PDV</th>
+        <th>Iznos</th>
+    </tr>
+    <tr th:each="taxDetails : ${invoiceTaxDetails.taxDetailsList}">
+        <td th:text="${taxDetails.taxRate} + ' %'"></td>
+        <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(taxDetails.subtotal)}"></td>
+        <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(taxDetails.tax)}"></td>
+        <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(taxDetails.total)}"></td>
     </tr>
 </table>
 </body>

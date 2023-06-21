@@ -2,9 +2,12 @@ package dev.alpey.reliabill.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 
 import dev.alpey.reliabill.enums.TaxRate;
 import dev.alpey.reliabill.model.dto.finance.InvoiceTaxDetails;
+import dev.alpey.reliabill.model.dto.finance.TaxDetails;
 import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.model.entity.Item;
 
@@ -36,30 +39,34 @@ public final class TaxCalculation {
     }
 
     public static InvoiceTaxDetails getInvoiceTaxDetails(Invoice invoice) {
+        List<TaxDetails> taxDetailsList = new ArrayList<>();
         var tax = invoice.getItems().stream()
                 .mapToDouble(Item::getTax)
                 .sum();
         var subtotal = invoice.getTotal() - tax;
-        var totalFor0 = calculateTaxAmountForTaxRate(TaxRate.RATE_0, invoice);
-        var totalFor10 = calculateTaxAmountForTaxRate(TaxRate.RATE_10, invoice);
-        var totalFor20 = invoice.getTotal() - totalFor10 - totalFor0;
 
-        var taxFor10 = calculateTax(totalFor10, LOWER_PRECALCULATED_TAX_RATE);
-        var subtotalFor10 = totalFor10 - taxFor10;
+        // calculate tax for each taxe rate found within items
+        for (TaxRate taxRate : TaxRate.values()) {
+            double totalForTaxRate = calculateTaxAmountForTaxRate(taxRate, invoice);
+            double precalculatedTaxRate = calculatePrecalculatedTaxRate(taxRate.getRate());
+            double taxForTaxRate = calculateTax(precalculatedTaxRate, totalForTaxRate);
+            double subtotalForTaxRate = totalForTaxRate - taxForTaxRate;
 
-        var taxFor20 = calculateTax(totalFor20, HIGHER_PRECALCULATED_TAX_RATE);
-        var subtotalFor20 = totalFor20 - taxFor20;
+            if (totalForTaxRate > 0) {
+                TaxDetails taxDetails = TaxDetails.builder()
+                        .taxRate(taxRate.getRate())
+                        .subtotal(subtotalForTaxRate)
+                        .tax(taxForTaxRate)
+                        .total(totalForTaxRate)
+                        .build();
+                taxDetailsList.add(taxDetails);
+            }
+        }
 
         return InvoiceTaxDetails.builder()
-                .totalFor20(totalFor20)
-                .totalFor10(totalFor10)
-                .totalFor0(totalFor0)
                 .tax(tax)
-                .taxFor20(taxFor20)
-                .taxFor10(taxFor10)
                 .subtotal(subtotal)
-                .subtotalFor20(subtotalFor20)
-                .subtotalFor10(subtotalFor10)
+                .taxDetailsList(taxDetailsList)
                 .build();
     }
 

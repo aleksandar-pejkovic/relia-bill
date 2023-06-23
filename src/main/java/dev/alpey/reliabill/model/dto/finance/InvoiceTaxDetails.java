@@ -12,5 +12,5 @@ public class InvoiceTaxDetails {
     private Double tax;
     private Double subtotal;
 
-    List<TaxDetails> taxDetailsList;
+    private List<TaxDetails> taxDetailsList;
 }

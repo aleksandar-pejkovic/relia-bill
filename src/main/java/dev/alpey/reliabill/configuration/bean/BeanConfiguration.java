@@ -9,8 +9,6 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
-import dev.alpey.reliabill.utils.NumberUtils;
-
 @Configuration
 @EnableAsync
 @EnableCaching

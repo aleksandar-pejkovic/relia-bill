@@ -86,7 +86,10 @@ public class PdfService {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ITextRenderer renderer = new ITextRenderer();
-        renderer.getFontResolver().addFont("C:\\Windows\\Fonts\\DejaVuSans.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+        renderer.getFontResolver().addFont(
+                "src/main/resources/fonts/dejaVuSans/DejaVuSans.ttf",
+                BaseFont.IDENTITY_H,
+                BaseFont.NOT_EMBEDDED);
         renderer.setDocumentFromString(htmlContent, null);
         renderer.layout();
         renderer.createPDF(out);

@@ -75,6 +75,7 @@ public class PdfService {
                 ));
 
         Context context = new Context();
+        context.setVariable("user", user);
         context.setVariable("userCompany", userCompany);
         context.setVariable("clientCompany", clientCompany);
         context.setVariable("invoice", invoice);

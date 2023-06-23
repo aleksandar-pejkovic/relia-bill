@@ -91,8 +91,8 @@ public class UserService {
         }
         ZoneId belgradeTimeZone = ZoneId.of("Europe/Belgrade");
         LocalDate currentDate = LocalDate.now(belgradeTimeZone);
-        userDto.setCreationDate(currentDate);
         User user = modelMapper.map(userDto, User.class);
+        user.setCreationDate(currentDate);
         encryptUserPassword(user);
         assignDefaultRoleToUser(user);
         User registeredUser = userRepository.save(user);

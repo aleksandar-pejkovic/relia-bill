@@ -1,19 +1,16 @@
 package dev.alpey.reliabill.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,18 +19,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.alpey.reliabill.configuration.exceptions.passwordResetToken.PasswordResetTokenNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.EmailExistsException;
 import dev.alpey.reliabill.configuration.exceptions.user.UserNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UsernameExistsException;
 import dev.alpey.reliabill.enums.RoleName;
 import dev.alpey.reliabill.model.dto.UserDto;
-import dev.alpey.reliabill.model.entity.PasswordResetToken;
 import dev.alpey.reliabill.model.entity.Product;
 import dev.alpey.reliabill.model.entity.Role;
 import dev.alpey.reliabill.model.entity.User;
 import dev.alpey.reliabill.repository.CompanyRepository;
-import dev.alpey.reliabill.repository.PasswordResetTokenRepository;
 import dev.alpey.reliabill.repository.ProductRepository;
 import dev.alpey.reliabill.repository.RoleRepository;
 import dev.alpey.reliabill.repository.UserRepository;
@@ -61,13 +55,7 @@ public class UserService {
     private CompanyRepository companyRepository;
 
     @Autowired
-    private PasswordResetTokenRepository passwordResetTokenRepository;
-
-    @Autowired
     private EmailService emailService;
-
-    @Value("${client.url}")
-    private String clientUrl;
 
     @Transactional(readOnly = true)
     public Set<UserDto> searchUsers(String searchTerm) {
@@ -124,52 +112,6 @@ public class UserService {
         return convertUserToDto(updatedUser);
     }
 
-    public void resetPassword(String email) {
-        User user = userRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found!"));
-        String token = UUID.randomUUID().toString();
-        String resetLink = clientUrl + "/reset-password?token=" + token;
-        createPasswordResetTokenForUser(user, token);
-        emailService.sendEmail(
-                user.getEmail(),
-                "Password reset token",
-                """
-                        Hello %s!
-                        Please click the following link to reset your password:
-                        %s
-                        """.formatted(
-                        user.getUsername(),
-                        resetLink)
-        );
-    }
-
-    private void createPasswordResetTokenForUser(User user, String token) {
-        PasswordResetToken passwordResetToken = PasswordResetToken.builder()
-                .token(token)
-                .user(user)
-                .expiryDate(LocalDateTime.now().plusDays(1))
-                .build();
-        passwordResetTokenRepository.save(passwordResetToken);
-    }
-
-    public void updatePassword(String token, String newPassword) {
-        PasswordResetToken passwordResetToken = passwordResetTokenRepository
-                .findByToken(token)
-                .orElseThrow(() -> new PasswordResetTokenNotFoundException("Reset token has already been used!"));
-
-        if (passwordResetToken.getExpiryDate()
-                .isBefore(LocalDateTime.now())) {
-            passwordResetTokenRepository.delete(passwordResetToken);
-            throw new PasswordResetTokenNotFoundException("Reset token expired!");
-        }
-
-        User user = passwordResetToken.getUser();
-        encryptUserPassword(user, newPassword);
-        userRepository.save(user);
-        passwordResetTokenRepository.delete(passwordResetToken);
-    }
-
     public UserDto grantAdminRoleToUser(String username) {
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found!"));
@@ -223,10 +165,6 @@ public class UserService {
 
     private void encryptUserPassword(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-    }
-
-    private void encryptUserPassword(User user, String newPassword) {
-        user.setPassword(passwordEncoder.encode(newPassword));
     }
 
     private void assignDefaultRoleToUser(User user) {

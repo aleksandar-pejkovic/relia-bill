@@ -53,7 +53,7 @@ public final class TaxCalculation {
             double subtotalForTaxRate = totalForTaxRate - taxForTaxRate;
 
             if (totalForTaxRate > 0) {
-                TaxDetails taxDetails = TaxDetails.builder()
+                var taxDetails = TaxDetails.builder()
                         .taxRate(taxRate.getRate())
                         .subtotal(subtotalForTaxRate)
                         .tax(taxForTaxRate)

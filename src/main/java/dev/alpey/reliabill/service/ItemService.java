@@ -42,9 +42,10 @@ public class ItemService {
         Invoice invoice = invoiceRepository.findById(itemDto.getInvoiceId())
                 .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
         Item item = modelMapper.map(itemDto, Item.class);
-
+        item.setTaxRate(TaxRate.fromRate(itemDto.getTaxRate()));
+        item.calculateTax();
+        invoice.increaseTotal(item.getTotal());
         item.setInvoice(invoice);
-        calculateTax(itemDto, item);
 
         Item savedItem = itemRepository.save(item);
         return convertItemToDto(savedItem);
@@ -56,13 +57,10 @@ public class ItemService {
     })
     public void deleteItem(Long id, Principal principal) {
         Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("Item not found!"));
-
-        Invoice invoice = item.getInvoice();
-        invoice.getItems().remove(item);
-
         itemRepository.delete(item);
 
-        invoice.setTotal(invoice.getTotal() - item.getTotal());
+        Invoice invoice = item.getInvoice();
+        invoice.decreaseTotal(item.getTotal());
         invoiceRepository.save(invoice);
     }
 
@@ -81,13 +79,6 @@ public class ItemService {
     public List<ItemDto> loadAllItemsForCurrentUser(Principal principal) {
         List<Item> items = itemRepository.findByUsername(principal.getName());
         return convertItemsToDtoList(items);
-    }
-
-    private static void calculateTax(ItemDto itemDto, Item item) {
-        item.setTaxRate(TaxRate.fromRate(itemDto.getTaxRate()));
-        item.calculateTax();
-        Invoice invoice = item.getInvoice();
-        invoice.setTotal(invoice.getTotal() + item.getTotal());
     }
 
     private List<ItemDto> convertItemsToDtoList(List<Item> items) {

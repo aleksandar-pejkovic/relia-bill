@@ -60,4 +60,12 @@ public class Invoice {
 
     @OneToMany(mappedBy = "invoice")
     private Set<Payment> payments = new HashSet<>();
+
+    public void increaseTotal(Double amount) {
+        this.total += amount;
+    }
+
+    public void decreaseTotal(Double amount) {
+        this.total -= amount;
+    }
 }

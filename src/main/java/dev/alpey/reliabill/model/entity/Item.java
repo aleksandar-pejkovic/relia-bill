@@ -54,6 +54,6 @@ public class Item {
     private Invoice invoice;
 
     public void calculateTax() {
-        TaxCalculation.calculateTax(this);
+        TaxCalculation.calculateItemTax(this);
     }
 }

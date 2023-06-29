@@ -24,7 +24,7 @@ public final class TaxCalculation {
     private TaxCalculation() {
     }
 
-    public static void calculateTax(Item item) {
+    public static void calculateItemTax(Item item) {
         double precalculatedTaxRate = calculatePrecalculatedTaxRate(item.getTaxRate().getRate());
         var price = item.getPrice();
         var quantity = item.getQuantity();

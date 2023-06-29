@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import dev.alpey.reliabill.configuration.exceptions.passwordResetToken.PasswordResetTokenExpiredException;
 import dev.alpey.reliabill.configuration.exceptions.passwordResetToken.PasswordResetTokenNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UserNotFoundException;
 import dev.alpey.reliabill.model.entity.PasswordResetToken;
@@ -71,7 +72,7 @@ public class PasswordResetService {
         if (passwordResetToken.getExpiryDate()
                 .isBefore(LocalDateTime.now())) {
             passwordResetTokenRepository.delete(passwordResetToken);
-            throw new PasswordResetTokenNotFoundException("Reset token expired!");
+            throw new PasswordResetTokenExpiredException("Reset token expired!");
         }
 
         User user = passwordResetToken.getUser();

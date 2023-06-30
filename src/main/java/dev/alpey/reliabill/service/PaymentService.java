@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.invoice.InvoiceNotFoundException;
+import dev.alpey.reliabill.enums.InvoiceStatus;
 import dev.alpey.reliabill.model.dto.PaymentDto;
 import dev.alpey.reliabill.model.entity.Company;
 import dev.alpey.reliabill.model.entity.Invoice;
@@ -38,10 +39,20 @@ public class PaymentService {
         Payment payment = modelMapper.map(paymentDto, Payment.class);
         Invoice invoice = invoiceRepository.findById(paymentDto.getInvoiceId())
                 .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
+        InvoiceStatus invoiceStatus = checkInvoiceStatus(invoice, payment);
+        invoice.setInvoiceStatus(invoiceStatus);
         payment.setInvoice(invoice);
         payment.setPaymentDate(LocalDateTime.now());
         Payment savedPayment = paymentRepository.save(payment);
         return convertPaymentToDto(savedPayment);
+    }
+
+    private InvoiceStatus checkInvoiceStatus(Invoice invoice, Payment payment) {
+        if (payment.getAmount() >= invoice.getTotal()) {
+            return InvoiceStatus.PAID;
+        } else {
+            return InvoiceStatus.PARTIALLY_PAID;
+        }
     }
 
     public PaymentDto loadPaymentById(Long id) {

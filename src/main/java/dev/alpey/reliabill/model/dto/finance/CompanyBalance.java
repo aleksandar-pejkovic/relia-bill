@@ -5,7 +5,9 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class CompanyBalanceDetails {
+public class CompanyBalance {
+
+    private String companyName;
 
     private double totalRevenue;
 

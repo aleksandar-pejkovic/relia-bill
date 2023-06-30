@@ -2,6 +2,7 @@ package dev.alpey.reliabill.service;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,8 +16,9 @@ import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.company.CompanyNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.user.UserNotFoundException;
+import dev.alpey.reliabill.enums.CompanyBalanceSortBy;
 import dev.alpey.reliabill.model.dto.CompanyDto;
-import dev.alpey.reliabill.model.dto.finance.CompanyBalanceDetails;
+import dev.alpey.reliabill.model.dto.finance.CompanyBalance;
 import dev.alpey.reliabill.model.entity.Company;
 import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.model.entity.User;
@@ -121,19 +123,37 @@ public class CompanyService {
         return convertCompaniesToDtoList(companies);
     }
 
-    public CompanyBalanceDetails loadCompanyBalance(Long id) {
+    public CompanyBalance loadCompanyBalance(Long id) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+        return loadCompanyBalance(company);
+    }
 
+    private CompanyBalance loadCompanyBalance(Company company) {
         double totalRevenue = calculateTotalRevenueForCompany(company);
         double totalPayments = paymentService.calculatePaymentsAmountByCompany(company);
         double totalDebt = totalRevenue - totalPayments;
 
-        return CompanyBalanceDetails.builder()
+        return CompanyBalance.builder()
+                .companyName(company.getName())
                 .totalRevenue(totalRevenue)
                 .totalPayments(totalPayments)
                 .totalDebt(totalDebt)
                 .build();
+    }
+
+    public List<CompanyBalance> sort(List<Company> companies, CompanyBalanceSortBy sortBy) {
+        Comparator<CompanyBalance> comparator = switch (sortBy) {
+            case REVENUE -> Comparator.comparingDouble(CompanyBalance::getTotalRevenue);
+            case PAYMENTS -> Comparator.comparingDouble(CompanyBalance::getTotalPayments);
+            case DEBT -> Comparator.comparingDouble(CompanyBalance::getTotalDebt);
+            default -> Comparator.comparing(CompanyBalance::getCompanyName);
+        };
+
+        return companies.stream()
+                .map(this::loadCompanyBalance)
+                .sorted(comparator)
+                .toList();
     }
 
     private Double calculateTotalRevenueForCompany(Company company) {

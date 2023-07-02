@@ -12,16 +12,70 @@
             font-family: "DejaVu Sans";
             font-size: 10px;
         }
+
+        .table th {
+            background-color: darkslateblue;
+            text-align: center;
+            padding: 6px;
+            font-weight: bold;
+            color: wheat;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table td {
+            padding: 4px;
+            border-bottom: 1px solid #ddd;
+            text-align: right;
+        }
+
+        .table tr:hover {
+            background-color: #aaaaaa;
+        }
+
+        .customers-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        .customers-table td:nth-child(2) {
+            text-align: left;
+        }
+
+        .customers-table td {
+            text-align: center;
+        }
+
+        @media print {
+          @page {
+            size: A4;
+            margin: 0;
+          }
+        }
     </style>
 </head>
 
 <body>
-<div class="">
-    <div class="">
-        <div class="">
-            
-        </div>
-    </div>
+<div>
+    <h1>Izveštaj kupaca</h1>
+</div>
+<div>
+    <table class="table customers-table">
+        <tr>
+            <th>#</th>
+            <th>Kupac</th>
+            <th>Promet</th>
+            <th>Uplate</th>
+            <th>Preostali dug</th>
+        </tr>
+        <tr th:each="balance, balanceStat : ${companyBalances}">
+            <td th:text="${balanceStat.count}"></td>
+            <td th:text="${balance.name}"></td>
+            <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(balance.revenue)}">0.00</td>
+            <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(balance.payments)}">0.00</td>
+            <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(balance.debt)}">0.00</td>
+        </tr>
+    </table>
 </div>
 </body>
 

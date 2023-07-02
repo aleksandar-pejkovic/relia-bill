@@ -66,14 +66,12 @@ public class PdfService {
     }
 
     public InputStream generateCompaniesReport(String username, String sortBy) throws Exception {
-        User user = userRepository.findByUsername(username).orElseThrow();
         List<Company> companies = companyRepository.findByUsername(username);
-        List<CompanyBalance> sortedCompanyBalance = companyService
+        List<CompanyBalance> sortedCompanyBalances = companyService
                 .sort(companies, CompanyBalanceSortBy.valueOf(sortBy));
 
         Context context = new Context();
-        context.setVariable("user", user);
-        context.setVariable("companyBalance", sortedCompanyBalance);
+        context.setVariable("companyBalances", sortedCompanyBalances);
 
         return getInputStream("companiesReport", context);
     }

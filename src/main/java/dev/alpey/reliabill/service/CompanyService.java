@@ -135,19 +135,19 @@ public class CompanyService {
         double totalDebt = totalRevenue - totalPayments;
 
         return CompanyBalance.builder()
-                .companyName(company.getName())
-                .totalRevenue(totalRevenue)
-                .totalPayments(totalPayments)
-                .totalDebt(totalDebt)
+                .name(company.getName())
+                .revenue(totalRevenue)
+                .payments(totalPayments)
+                .debt(totalDebt)
                 .build();
     }
 
     public List<CompanyBalance> sort(List<Company> companies, CompanyBalanceSortBy sortBy) {
         Comparator<CompanyBalance> comparator = switch (sortBy) {
-            case REVENUE -> Comparator.comparingDouble(CompanyBalance::getTotalRevenue);
-            case PAYMENTS -> Comparator.comparingDouble(CompanyBalance::getTotalPayments);
-            case DEBT -> Comparator.comparingDouble(CompanyBalance::getTotalDebt);
-            default -> Comparator.comparing(CompanyBalance::getCompanyName);
+            case REVENUE -> Comparator.comparingDouble(CompanyBalance::getRevenue).reversed();
+            case PAYMENTS -> Comparator.comparingDouble(CompanyBalance::getPayments).reversed();
+            case DEBT -> Comparator.comparingDouble(CompanyBalance::getDebt).reversed();
+            default -> Comparator.comparing(CompanyBalance::getName);
         };
 
         return companies.stream()

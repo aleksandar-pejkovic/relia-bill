@@ -7,11 +7,11 @@ import lombok.Getter;
 @Getter
 public class CompanyBalance {
 
-    private String companyName;
+    private String name;
 
-    private double totalRevenue;
+    private double revenue;
 
-    private double totalPayments;
+    private double payments;
 
-    private double totalDebt;
+    private double debt;
 }

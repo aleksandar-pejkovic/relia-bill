@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lowagie.text.DocumentException;
@@ -35,8 +36,8 @@ public class PdfController {
     private InvoiceRepository invoiceRepository;
 
     @GetMapping("/invoice/{id}")
-    public ResponseEntity<InputStreamResource> getInvoicePdf(@PathVariable Long id, Principal principal)
-            throws DocumentException, Exception {
+    public ResponseEntity<InputStreamResource> createInvoicePdf(@PathVariable Long id, Principal principal)
+            throws Exception {
 
         InputStream inputStream = pdfService.generateInvoicePdf(principal.getName(), id);
         InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
@@ -64,5 +65,21 @@ public class PdfController {
 
         return ResponseEntity.ok()
                 .body("Invoice sent to client.");
+    }
+
+    @GetMapping("/customer-report")
+    public ResponseEntity<InputStreamResource> createCustomerReportPdf(
+            @RequestParam String sortBy,
+            Principal principal) throws Exception {
+
+        InputStream inputStream = pdfService.generateCompaniesReport(principal.getName(), sortBy);
+        InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.attachment().filename("customer-report.pdf").build());
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(inputStreamResource);
     }
 }

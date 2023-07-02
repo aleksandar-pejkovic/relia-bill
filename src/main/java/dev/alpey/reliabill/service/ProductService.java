@@ -100,7 +100,7 @@ public class ProductService {
                 createWorkbook(inputStream, filename)) {
             Sheet sheet = workbook.getSheetAt(0);
             Stream<Row> rowStream = StreamSupport.stream(sheet.spliterator(), false);
-
+            List<Product> products = new ArrayList<>();
             rowStream
                     .skip(1) // Skip the header row
                     .forEach(row -> {
@@ -147,15 +147,11 @@ public class ProductService {
                                 .filter(storedProduct -> storedProduct.getUsername().equals(product.getUsername()))
                                 .findFirst()
                                 .ifPresent(storedProduct -> product.setId(storedProduct.getId()));
-                        saveProduct(principal, product);
+                        products.add(product);
                     });
+            productRepository.saveAll(products);
         } catch (IOException | EncryptedDocumentException ignored) {
         }
-    }
-
-    @CacheEvict(value = "productsByUser", key = "#principal.getName()")
-    private void saveProduct(Principal principal, Product product) {
-        productRepository.save(product);
     }
 
     private Workbook createWorkbook(InputStream inputStream, String filename) throws IOException {

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import dev.alpey.reliabill.configuration.exceptions.product.ProductNotFoundException;
 import dev.alpey.reliabill.enums.TaxRate;
 import dev.alpey.reliabill.model.dto.ProductDto;
+import dev.alpey.reliabill.model.entity.Item;
 import dev.alpey.reliabill.model.entity.Product;
 import dev.alpey.reliabill.repository.ProductRepository;
 import dev.alpey.reliabill.repository.UserRepository;
@@ -77,6 +78,20 @@ public class ProductService {
     public List<ProductDto> loadAllProducts() {
         List<Product> products = productRepository.findAll();
         return convertProductsToDtoList(products);
+    }
+
+    public void registerProductSale(Item item) {
+        Product product = productRepository.findByName(item.getProductName())
+                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
+        product.registerSale(item.getQuantity(), item.getTotal());
+        productRepository.save(product);
+    }
+
+    public void discardProductSale(Item item) {
+        Product product = productRepository.findByName(item.getProductName())
+                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
+        product.discardSale(item.getQuantity(), item.getTotal());
+        productRepository.save(product);
     }
 
     private List<ProductDto> convertProductsToDtoList(List<Product> products) {

@@ -40,5 +40,23 @@ public class Product {
 
     private Double price;
 
+    private Double inStock = 0.0;
+
+    private Double unitsSold = 0.0;
+
+    private Double revenue = 0.0;
+
     private String username;
+
+    public void registerSale(double quantity, double total) {
+        this.inStock -= quantity;
+        this.unitsSold += quantity;
+        this.revenue += total;
+    }
+
+    public void discardSale(double quantity, double total) {
+        this.inStock += quantity;
+        this.unitsSold -= quantity;
+        this.revenue -= total;
+    }
 }

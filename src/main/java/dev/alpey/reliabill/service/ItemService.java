@@ -32,6 +32,9 @@ public class ItemService {
     private InvoiceRepository invoiceRepository;
 
     @Autowired
+    private ProductService productService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Caching(evict = {
@@ -46,6 +49,7 @@ public class ItemService {
         item.calculateTax();
         invoice.increaseTotal(item.getTotal());
         item.setInvoice(invoice);
+        productService.registerProductSale(item);
 
         Item savedItem = itemRepository.save(item);
         return convertItemToDto(savedItem);
@@ -58,6 +62,7 @@ public class ItemService {
     public void deleteItem(Long id, Principal principal) {
         Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("Item not found!"));
         itemRepository.delete(item);
+        productService.discardProductSale(item);
 
         Invoice invoice = item.getInvoice();
         invoice.decreaseTotal(item.getTotal());

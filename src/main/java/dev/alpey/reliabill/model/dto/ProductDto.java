@@ -3,6 +3,7 @@ package dev.alpey.reliabill.model.dto;
 import dev.alpey.reliabill.configuration.validation.product.name.ProductName;
 import dev.alpey.reliabill.configuration.validation.product.plu.PluNumber;
 import dev.alpey.reliabill.configuration.validation.product.price.Price;
+import dev.alpey.reliabill.configuration.validation.product.quantity.Quantity;
 import dev.alpey.reliabill.configuration.validation.product.taxrate.TaxRate;
 import dev.alpey.reliabill.configuration.validation.product.unit.Unit;
 import lombok.AllArgsConstructor;
@@ -36,4 +37,7 @@ public class ProductDto {
 
     @Price
     private Double price;
+
+    @Quantity
+    private Double inStock;
 }

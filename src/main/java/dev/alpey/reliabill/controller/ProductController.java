@@ -1,6 +1,5 @@
 package dev.alpey.reliabill.controller;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import dev.alpey.reliabill.model.dto.ProductDto;
 import dev.alpey.reliabill.service.ProductService;
@@ -55,20 +53,5 @@ public class ProductController {
     @GetMapping
     public List<ProductDto> fetchAllProducts(Principal principal) {
         return productService.loadAllProductsByUsername(principal.getName());
-    }
-
-    @PostMapping("/upload")
-    public void uploadFile(@RequestParam("file") MultipartFile file, Principal principal) {
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("No file selected.");
-        }
-        String filename = file.getOriginalFilename();
-        byte[] fileData;
-        try {
-            fileData = file.getBytes();
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Error reading file data.", e);
-        }
-        productService.saveProductsFromFile(fileData, filename, principal);
     }
 }

@@ -80,6 +80,9 @@ CREATE TABLE products (
   description VARCHAR(300),
   tax_rate INT,
   price DECIMAL(10,2),
+  in_stock DECIMAL(10, 2) DEFAULT 0.0,
+  units_sold DECIMAL(10, 2) DEFAULT 0.0,
+  revenue DECIMAL(10, 2) DEFAULT 0.0;
   username VARCHAR(60),
   PRIMARY KEY (id)
 );

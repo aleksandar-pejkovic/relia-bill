@@ -2,6 +2,7 @@ package dev.alpey.reliabill.service;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.product.ProductNotFoundException;
+import dev.alpey.reliabill.enums.ProductSortBy;
 import dev.alpey.reliabill.enums.TaxRate;
 import dev.alpey.reliabill.model.dto.ProductDto;
 import dev.alpey.reliabill.model.entity.Item;
@@ -81,17 +83,36 @@ public class ProductService {
     }
 
     public void registerProductSale(Item item) {
-        Product product = productRepository.findByName(item.getProductName())
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Product usersProduct = productRepository.findByName(item.getProductName()).stream()
+                .filter(product -> product.getUsername().equals(username))
+                .findAny()
                 .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
-        product.registerSale(item.getQuantity(), item.getTotal());
-        productRepository.save(product);
+        usersProduct.registerSale(item.getQuantity(), item.getTotal());
+        productRepository.save(usersProduct);
     }
 
     public void discardProductSale(Item item) {
-        Product product = productRepository.findByName(item.getProductName())
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Product usersProduct = productRepository.findByName(item.getProductName()).stream()
+                .filter(product -> product.getUsername().equals(username))
+                .findAny()
                 .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
-        product.discardSale(item.getQuantity(), item.getTotal());
-        productRepository.save(product);
+        usersProduct.discardSale(item.getQuantity(), item.getTotal());
+        productRepository.save(usersProduct);
+    }
+
+    public List<Product> sort(List<Product> products, ProductSortBy sortBy) {
+        Comparator<Product> comparator = switch (sortBy) {
+            case REVENUE -> Comparator.comparingDouble(Product::getRevenue).reversed();
+            case UNITS_SOLD -> Comparator.comparingDouble(Product::getUnitsSold).reversed();
+            case IN_STOCK -> Comparator.comparingDouble(Product::getInStock).reversed();
+            default -> Comparator.comparing(Product::getName);
+        };
+
+        return products.stream()
+                .sorted(comparator)
+                .toList();
     }
 
     private List<ProductDto> convertProductsToDtoList(List<Product> products) {

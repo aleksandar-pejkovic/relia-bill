@@ -16,16 +16,20 @@ import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.BaseFont;
 
 import dev.alpey.reliabill.enums.CompanyBalanceSortBy;
+import dev.alpey.reliabill.enums.ProductSortBy;
 import dev.alpey.reliabill.model.dto.finance.CompanyBalance;
 import dev.alpey.reliabill.model.dto.finance.InvoiceTaxDetails;
 import dev.alpey.reliabill.model.entity.Company;
 import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.model.entity.Item;
+import dev.alpey.reliabill.model.entity.Product;
 import dev.alpey.reliabill.model.entity.User;
 import dev.alpey.reliabill.repository.CompanyRepository;
 import dev.alpey.reliabill.repository.InvoiceRepository;
+import dev.alpey.reliabill.repository.ProductRepository;
 import dev.alpey.reliabill.repository.UserRepository;
 import dev.alpey.reliabill.service.CompanyService;
+import dev.alpey.reliabill.service.ProductService;
 import dev.alpey.reliabill.utils.TaxCalculation;
 
 @Service
@@ -36,6 +40,12 @@ public class PdfService {
 
     @Autowired
     private CompanyService companyService;
+
+    @Autowired
+    private ProductService productService;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -74,6 +84,19 @@ public class PdfService {
         context.setVariable("companyBalances", sortedCompanyBalances);
 
         return getInputStream("companiesReport", context);
+    }
+
+    public InputStream generateProductsReport(String username, String sortBy) throws Exception {
+        List<Product> products = productRepository.findByUsername(username).stream()
+                .filter(product -> product.getUnitsSold() > 0)
+                .toList();
+        List<Product> sortedProducts = productService
+                .sort(products, ProductSortBy.valueOf(sortBy));
+
+        Context context = new Context();
+        context.setVariable("products", sortedProducts);
+
+        return getInputStream("productsReport", context);
     }
 
     private ByteArrayInputStream getInputStream(String templateName,

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="sr" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Products Report</title>
+    <link rel="stylesheet" th:href="@{~/css/invoice.css}"/>
+    <style>
+        body {
+            box-sizing: border-box;
+            font-family: "DejaVu Sans";
+            font-size: 10px;
+        }
+
+        .table th {
+            background-color: darkslateblue;
+            text-align: center;
+            padding: 6px;
+            font-weight: bold;
+            color: wheat;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table td {
+            padding: 4px;
+            border-bottom: 1px solid #ddd;
+            text-align: right;
+        }
+
+        .table tr:hover {
+            background-color: #aaaaaa;
+        }
+
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        .products-table td:nth-child(2) {
+            text-align: left;
+        }
+
+        .products-table td {
+            text-align: center;
+        }
+
+        @media print {
+          @page {
+            size: A4;
+            margin: 0;
+          }
+        }
+    </style>
+</head>
+
+<body>
+<div>
+    <h1>Izveštaj proizvoda</h1>
+</div>
+<div>
+    <table class="table products-table">
+        <tr>
+            <th>#</th>
+            <th>Proizvod</th>
+            <th>Na zalihama</th>
+            <th>Prodato jedinica</th>
+            <th>Prihod</th>
+        </tr>
+        <tr th:each="product, productStat : ${products}">
+            <td th:text="${productStat.count}"></td>
+            <td th:text="${product.name}"></td>
+            <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(product.inStock)}">0.00</td>
+            <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(product.unitsSold)}">0.00</td>
+            <td th:text="${@dev.alpey.reliabill.utils.NumberUtils@formatNumber(product.revenue)}">0.00</td>
+        </tr>
+    </table>
+</div>
+</body>
+
+</html>

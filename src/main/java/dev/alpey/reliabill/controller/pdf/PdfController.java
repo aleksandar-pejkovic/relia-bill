@@ -67,8 +67,8 @@ public class PdfController {
                 .body("Invoice sent to client.");
     }
 
-    @GetMapping("/customer-report")
-    public ResponseEntity<InputStreamResource> createCustomerReportPdf(
+    @GetMapping("/companies-report")
+    public ResponseEntity<InputStreamResource> createCompaniesReportPdf(
             @RequestParam String sortBy,
             Principal principal) throws Exception {
 
@@ -77,7 +77,23 @@ public class PdfController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDisposition(ContentDisposition.attachment().filename("customer-report.pdf").build());
+        headers.setContentDisposition(ContentDisposition.attachment().filename("companies-report.pdf").build());
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(inputStreamResource);
+    }
+
+    @GetMapping("/products-report")
+    public ResponseEntity<InputStreamResource> createProductsReportPdf(
+            @RequestParam String sortBy,
+            Principal principal) throws Exception {
+
+        InputStream inputStream = pdfService.generateProductsReport(principal.getName(), sortBy);
+        InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.attachment().filename("products-report.pdf").build());
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(inputStreamResource);

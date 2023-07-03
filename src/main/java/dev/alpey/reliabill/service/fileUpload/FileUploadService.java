@@ -8,6 +8,9 @@ import java.io.InputStreamReader;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -37,6 +40,10 @@ public class FileUploadService {
     @CacheEvict(value = "productsByUser", key = "#principal.getName()")
     @Transactional
     public void saveProductsFromFile(byte[] fileData, String filename, Principal principal) {
+        Map<Integer, Product> storedProducts = productRepository.findByUsername(principal.getName())
+                .stream()
+                .collect(Collectors.toMap(Product::getPlu, Function.identity()));
+
         try (InputStream inputStream = new ByteArrayInputStream(fileData); Workbook workbook =
                 createWorkbook(inputStream, filename)) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -60,21 +67,15 @@ public class FileUploadService {
                                 .substring(1)
                                 .toLowerCase()
                                 .trim();
-                        Product product = Product.builder()
-                                .plu(plu)
-                                .name(productName)
-                                .price(price)
-                                .username(principal.getName())
-                                .taxRate(TaxRate.RATE_20)
-                                .build();
 
-                        productRepository.findByPlu(product.getPlu())
-                                .stream()
-                                .filter(storedProduct -> storedProduct
-                                        .getUsername()
-                                        .equals(product.getUsername()))
-                                .findFirst()
-                                .ifPresent(storedProduct -> product.setId(storedProduct.getId()));
+                        Product product = storedProducts.getOrDefault(plu, new Product());
+
+                        product.setPlu(plu);
+                        product.setName(productName);
+                        product.setPrice(price);
+                        product.setUsername(principal.getName());
+                        product.setTaxRate(TaxRate.RATE_20);
+
                         products.add(product);
                     });
             productRepository.saveAll(products);

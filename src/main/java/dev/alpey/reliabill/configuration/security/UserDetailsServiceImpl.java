@@ -1,13 +1,8 @@
 package dev.alpey.reliabill.configuration.security;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -38,30 +33,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
-
-        Optional<User> user = userRepository.findByUsername(username);
-
-        if (user.isEmpty()) {
-            throw new UsernameNotFoundException("Username '" + username + "' not found!");
-        } else {
-            if ("demo".equals(username)) {
-                ZoneId belgradeTimeZone = ZoneId.of("Europe/Belgrade");
-                LocalDateTime currentDateTime = LocalDateTime.now(belgradeTimeZone);
-                String formattedDateTime = currentDateTime.format(
-                        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
-                emailService.sendEmailToAdmin("""
-                                Login with %s
-                                """.formatted(username),
-                        """
-                                Someone logged in with %s account.
-                                Login time: %s.
-                                """.formatted(
-                                username,
-                                formattedDateTime
-                        ));
-            }
-            return buildUserDetails(user.get());
-        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Username '" + username + "' not found!"));
+        return buildUserDetails(user);
     }
 
     private org.springframework.security.core.userdetails.User buildUserDetails(User user) {

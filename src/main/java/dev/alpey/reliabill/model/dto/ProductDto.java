@@ -36,4 +36,8 @@ public class ProductDto {
 
     @Price
     private Double price;
+
+    private Double inStock;
+
+    private Double unitsSold;
 }

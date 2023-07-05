@@ -1,7 +1,7 @@
 package dev.alpey.reliabill.model.entity;
 
 import dev.alpey.reliabill.enums.TaxRate;
-import dev.alpey.reliabill.utils.TaxCalculation;
+import dev.alpey.reliabill.utils.TaxCalculator;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -54,6 +54,6 @@ public class Item {
     private Invoice invoice;
 
     public void calculateTax() {
-        TaxCalculation.calculateItemTax(this);
+        TaxCalculator.calculateItemTax(this);
     }
 }

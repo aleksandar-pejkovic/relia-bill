@@ -30,7 +30,7 @@ import dev.alpey.reliabill.repository.ProductRepository;
 import dev.alpey.reliabill.repository.UserRepository;
 import dev.alpey.reliabill.service.CompanyService;
 import dev.alpey.reliabill.service.ProductService;
-import dev.alpey.reliabill.utils.TaxCalculation;
+import dev.alpey.reliabill.utils.TaxCalculator;
 
 @Service
 public class PdfService {
@@ -59,7 +59,7 @@ public class PdfService {
     public InputStream generateInvoicePdf(String username, Long invoiceId) throws Exception {
         User user = userRepository.findByUsername(username).orElseThrow();
         Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow();
-        InvoiceTaxDetails invoiceTaxDetails = TaxCalculation.getInvoiceTaxDetails(invoice);
+        InvoiceTaxDetails invoiceTaxDetails = TaxCalculator.getInvoiceTaxDetails(invoice);
         Company userCompany = companyRepository.findById(user.getCompanyId()).orElseThrow();
         Company clientCompany = invoice.getCompany();
         List<Item> items = invoice.getItems();

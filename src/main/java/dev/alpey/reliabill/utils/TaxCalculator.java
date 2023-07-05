@@ -11,7 +11,7 @@ import dev.alpey.reliabill.model.dto.finance.TaxDetails;
 import dev.alpey.reliabill.model.entity.Invoice;
 import dev.alpey.reliabill.model.entity.Item;
 
-public final class TaxCalculation {
+public final class TaxCalculator {
 
     private static final int HIGHER_TAX_RATE = 20;
 
@@ -21,7 +21,7 @@ public final class TaxCalculation {
 
     private static final double LOWER_PRECALCULATED_TAX_RATE = 0.09090909090909091;
 
-    private TaxCalculation() {
+    private TaxCalculator() {
     }
 
     public static void calculateItemTax(Item item) {
@@ -45,7 +45,7 @@ public final class TaxCalculation {
                 .sum();
         var subtotal = invoice.getTotal() - tax;
 
-        // calculate tax for each taxe rate found within items
+        // calculate tax for each tax rate found within items
         for (TaxRate taxRate : TaxRate.values()) {
             double totalForTaxRate = calculateTaxAmountForTaxRate(taxRate, invoice);
             double precalculatedTaxRate = calculatePrecalculatedTaxRate(taxRate.getRate());

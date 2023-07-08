@@ -105,7 +105,7 @@ public class CompanyService {
                         () -> new UserNotFoundException("User not found!")
                 );
         if (user.getCompanyId() == null) {
-            throw new CompanyNotFoundException("Company not found!");
+            return null;
         }
         Company company = companyRepository.findById(user.getCompanyId())
                 .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));

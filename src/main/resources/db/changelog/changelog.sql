@@ -8,7 +8,6 @@ CREATE TABLE users (
     email VARCHAR(60) NOT NULL UNIQUE,
     name VARCHAR(60) NOT NULL,
     creation_date DATE NOT NULL,
-    vat_status BOOLEAN,
     company_id INT(11),
     PRIMARY KEY (id)
 );
@@ -31,11 +30,12 @@ CREATE TABLE users_roles (
   CONSTRAINT
     FOREIGN KEY (user_id)
     REFERENCES users(id)
-    ON DELETE CASCADE,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT
     FOREIGN KEY (role_id)
     REFERENCES roles(id)
-  );
+);
 
 CREATE TABLE permissions (
     id INT(11) NOT NULL AUTO_INCREMENT,
@@ -82,7 +82,7 @@ CREATE TABLE products (
   price DECIMAL(10,2),
   in_stock DECIMAL(10, 2) DEFAULT 0.0,
   units_sold DECIMAL(10, 2) DEFAULT 0.0,
-  revenue DECIMAL(10, 2) DEFAULT 0.0;
+  revenue DECIMAL(10, 2) DEFAULT 0.0,
   username VARCHAR(60),
   PRIMARY KEY (id)
 );
@@ -100,12 +100,14 @@ CREATE TABLE companies (
     phone VARCHAR(15) NOT NULL,
     email VARCHAR(60) NOT NULL,
     website VARCHAR(60),
+    vat_status BOOLEAN,
     user_id INT(11),
     PRIMARY KEY (id),
     CONSTRAINT
         FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE invoices (
@@ -122,6 +124,7 @@ CREATE TABLE invoices (
         FOREIGN KEY (company_id)
         REFERENCES companies(id)
         ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE items (
@@ -154,23 +157,9 @@ CREATE TABLE payments (
     FOREIGN KEY (invoice_id)
     REFERENCES invoices(id)
     ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
 
---changeset apejkovic:2
-INSERT INTO users (username, password, email, name, creation_date, vat_status) VALUES
-(
-    'pejko89',
-    '$2a$10$c4k24Pk4lNy/v9wEZRsuT.LrTsYRLK7Jj7.mLahhCZwCgoWwAY7IW',
-    'pejko1989@live.com',
-    'Aleksandar Pejkovic',
-    '2023-04-09',
-    1
-);
-
-INSERT INTO users_roles(user_id, role_id) VALUES
-    (1, 1);
-
---changeset apejkovic:3
 CREATE TABLE password_reset_token (
   id INT(11) PRIMARY KEY AUTO_INCREMENT,
   token VARCHAR(255) NOT NULL,
@@ -180,4 +169,64 @@ CREATE TABLE password_reset_token (
     FOREIGN KEY (user_id)
     REFERENCES users (id)
     ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
+
+--changeset apejkovic:2
+INSERT INTO companies (id, name, director, registration_number, tax_number, bank_account, street, zip, city, phone,
+email, website, vat_status)
+VALUES
+(
+    1,
+    'Alpey',
+    'Aleksandar Pejković',
+    '12345678',
+    '987654321',
+    '123-1004567-890',
+    'Kralja Aleksandra 17',
+    '37266',
+    'Obrež',
+    '0659170989',
+    'info.reliabill@gmail.com',
+    'reliabill.app',
+    true
+),
+(
+    2,
+    'Alpey',
+    'Aleksandar Pejković',
+    '12345678',
+    '987654321',
+    '123-1004567-890',
+    'Kralja Aleksandra 17',
+    '11000',
+    'Beograd',
+    '0659170989',
+    'info.reliabill@gmail.com',
+    'reliabill.app',
+    true
+);
+
+INSERT INTO users VALUES
+(
+    1,
+    'pejko89',
+    '$2a$10$c4k24Pk4lNy/v9wEZRsuT.LrTsYRLK7Jj7.mLahhCZwCgoWwAY7IW',
+    'pejko89.ap@gmail.com',
+    'Aleksandar Pejković',
+    '2023-04-09',
+    1
+),
+(
+    2,
+    'demo',
+    '$2a$10$c4k24Pk4lNy/v9wEZRsuT.LrTsYRLK7Jj7.mLahhCZwCgoWwAY7IW',
+    'aleksandar.pejkovic89@gmail.com',
+    'Demo Tester',
+    '2023-07-07',
+    2
+);
+
+INSERT INTO users_roles(user_id, role_id) VALUES
+    (1, 1),
+    (2, 2);

@@ -52,6 +52,8 @@ public class Company {
 
     private String website;
 
+    private Boolean vatStatus;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

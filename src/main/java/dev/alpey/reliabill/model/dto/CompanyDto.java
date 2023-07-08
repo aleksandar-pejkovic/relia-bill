@@ -52,4 +52,6 @@ public class CompanyDto {
 
     @Website
     private String website;
+
+    private Boolean vatStatus;
 }

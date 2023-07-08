@@ -41,8 +41,6 @@ public class User {
 
     private LocalDate creationDate;
 
-    private Boolean vatStatus = true;
-
     @ManyToMany
     @JoinTable(
             name = "users_roles",

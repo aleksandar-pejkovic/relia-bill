@@ -100,6 +100,7 @@ public class InvoiceService {
         InvoiceDto invoiceDto = modelMapper.map(invoice, InvoiceDto.class);
         invoiceDto.setInvoiceStatus(invoice.getInvoiceStatus().name());
         invoiceDto.setDocumentType(invoice.getDocumentType().name());
+        invoiceDto.setCompanyName(invoice.getCompany().getName());
         invoiceDto.setCompanyId(invoice.getCompany().getId());
         return invoiceDto;
     }

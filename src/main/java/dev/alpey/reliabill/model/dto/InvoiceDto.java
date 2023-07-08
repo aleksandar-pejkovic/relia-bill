@@ -35,5 +35,7 @@ public class InvoiceDto {
 
     private Double total;
 
+    private String companyName;
+
     private Long companyId;
 }

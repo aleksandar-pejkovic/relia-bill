@@ -1,4 +1,4 @@
-package dev.alpey.reliabill.service.jwt;
+package dev.alpey.reliabill.service.auth;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

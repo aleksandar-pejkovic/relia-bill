@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.alpey.reliabill.model.dto.CompanyDto;
+
 @Service
 public class LoginDataService {
 
@@ -29,10 +31,13 @@ public class LoginDataService {
     @Transactional(readOnly = true)
     public Map<String, Object> loadUsersData(Principal principal) {
         String username = principal.getName();
+        CompanyDto ownCompany = companyService.loadOwnCompany(username);
 
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("user", userService.loadUserByUsername(username));
-        dataMap.put("ownCompany", companyService.loadOwnCompany(username));
+        if (ownCompany != null) {
+            dataMap.put("ownCompany", ownCompany);
+        }
         dataMap.put("companies", companyService.loadAllCompaniesForLoggedUser(principal));
         dataMap.put("invoices", invoiceService.loadAllInvoicesForLoggedUser(principal));
         dataMap.put("products", productService.loadAllProductsByUsername(username));

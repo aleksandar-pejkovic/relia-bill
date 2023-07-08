@@ -49,21 +49,19 @@ public class CompanyService {
 
     @CachePut(value = "ownCompany", key = "#principal.getName()")
     public CompanyDto createOwnCompany(CompanyDto companyDto, Principal principal) {
-        User loggedUser = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+        User currentUser = obtainCurrentUser(principal);
         Company ownCompany = modelMapper.map(companyDto, Company.class);
         Company storedCompany = companyRepository.save(ownCompany);
-        loggedUser.setCompanyId(storedCompany.getId());
-        userRepository.save(loggedUser);
+        currentUser.setCompanyId(storedCompany.getId());
+        userRepository.save(currentUser);
         return convertCompanyToDto(storedCompany);
     }
 
     @CacheEvict(value = "companiesByUser", key = "#principal.getName()")
     public CompanyDto createClientCompany(CompanyDto companyDto, Principal principal) {
-        User loggedUser = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+        User currentUser = obtainCurrentUser(principal);
         Company clientCompany = modelMapper.map(companyDto, Company.class);
-        clientCompany.setUser(loggedUser);
+        clientCompany.setUser(currentUser);
         Company savedCompany = companyRepository.save(clientCompany);
         return convertCompanyToDto(savedCompany);
     }
@@ -73,8 +71,7 @@ public class CompanyService {
             @CacheEvict(value = "companiesByUser", key = "#principal.getName()")
     })
     public CompanyDto updateCompany(CompanyDto companyDto, Principal principal) {
-        Company storedCompany = companyRepository.findById(companyDto.getId())
-                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+        Company storedCompany = obtainStoredCompany(companyDto.getId());
         modelMapper.map(companyDto, storedCompany);
         Company updatedCompany = companyRepository.save(storedCompany);
         return convertCompanyToDto(updatedCompany);
@@ -93,28 +90,23 @@ public class CompanyService {
     }
 
     @Cacheable(value = "companiesByUser", key = "#principal.getName()")
-    public List<CompanyDto> loadAllCompaniesForLoggedUser(Principal principal) {
+    public List<CompanyDto> loadAllCompaniesForCurrentUser(Principal principal) {
         List<Company> companies = companyRepository.findByUsername(principal.getName());
         return convertCompaniesToDtoList(companies);
     }
 
     @Cacheable(value = "ownCompany", key = "#username")
     public CompanyDto loadOwnCompany(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(
-                        () -> new UserNotFoundException("User not found!")
-                );
-        if (user.getCompanyId() == null) {
+        User currentUser = obtainCurrentUser(username);
+        if (currentUser.getCompanyId() == null) {
             return null;
         }
-        Company company = companyRepository.findById(user.getCompanyId())
-                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+        Company company = obtainStoredCompany(currentUser.getCompanyId());
         return convertCompanyToDto(company);
     }
 
     public CompanyDto loadCompanyById(Long id) {
-        Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+        Company company = obtainStoredCompany(id);
         return convertCompanyToDto(company);
     }
 
@@ -124,9 +116,25 @@ public class CompanyService {
     }
 
     public CompanyBalance loadCompanyBalance(Long id) {
-        Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+        Company company = obtainStoredCompany(id);
         return loadCompanyBalance(company);
+    }
+
+    private User obtainCurrentUser(Principal principal) {
+        return userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+    }
+
+    private Company obtainStoredCompany(Long id) {
+        return companyRepository.findById(id)
+                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+    }
+
+    private User obtainCurrentUser(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(
+                        () -> new UserNotFoundException("User not found!")
+                );
     }
 
     private CompanyBalance loadCompanyBalance(Company company) {

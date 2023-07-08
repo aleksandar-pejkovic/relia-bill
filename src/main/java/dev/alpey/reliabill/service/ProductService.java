@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -21,16 +22,12 @@ import dev.alpey.reliabill.model.dto.ProductDto;
 import dev.alpey.reliabill.model.entity.Item;
 import dev.alpey.reliabill.model.entity.Product;
 import dev.alpey.reliabill.repository.ProductRepository;
-import dev.alpey.reliabill.repository.UserRepository;
 
 @Service
 public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -45,19 +42,14 @@ public class ProductService {
 
     @CacheEvict(value = "productsByUser", key = "#principal.getName()")
     public ProductDto createProduct(ProductDto productDto, Principal principal) {
-        Product product = modelMapper.map(productDto, Product.class);
-        product.setUsername(principal.getName());
-        product.setTaxRate(TaxRate.fromRate(productDto.getTaxRate()));
+        Product product = constructProduct(productDto, principal);
         Product savedProduct = productRepository.save(product);
         return convertProductToDto(savedProduct);
     }
 
     @CacheEvict(value = "productsByUser", key = "#principal.getName()")
     public ProductDto updateProduct(ProductDto productDto, Principal principal) {
-        Product storedProduct = productRepository.findById(productDto.getId())
-                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
-        storedProduct.setTaxRate(TaxRate.fromRate(productDto.getTaxRate()));
-        modelMapper.map(productDto, storedProduct);
+        Product storedProduct = obtainStoredProduct(productDto);
         Product updatedProduct = productRepository.save(storedProduct);
         return convertProductToDto(updatedProduct);
     }
@@ -84,35 +76,58 @@ public class ProductService {
 
     public void registerProductSale(Item item) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Product usersProduct = productRepository.findByName(item.getProductName()).stream()
-                .filter(product -> product.getUsername().equals(username))
-                .findAny()
-                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
+        Product usersProduct = obtainUsersProduct(item, username);
         usersProduct.registerSale(item.getQuantity(), item.getTotal());
         productRepository.save(usersProduct);
     }
 
     public void discardProductSale(Item item) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Product usersProduct = productRepository.findByName(item.getProductName()).stream()
-                .filter(product -> product.getUsername().equals(username))
-                .findAny()
-                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
+        Product usersProduct = obtainUsersProduct(item, username);
         usersProduct.discardSale(item.getQuantity(), item.getTotal());
         productRepository.save(usersProduct);
     }
 
     public List<Product> sort(List<Product> products, ProductSortBy sortBy) {
-        Comparator<Product> comparator = switch (sortBy) {
+        Comparator<Product> comparator = getProductComparator(sortBy);
+        return products.stream()
+                .sorted(comparator)
+                .toList();
+    }
+
+    private Product obtainUsersProduct(Item item, String username) {
+        return productRepository.findByName(item.getProductName()).stream()
+                .filter(product -> product.getUsername().equals(username))
+                .findAny()
+                .orElseThrow(getProductNotFoundExceptionSupplier());
+    }
+
+    private Product constructProduct(ProductDto productDto, Principal principal) {
+        Product product = modelMapper.map(productDto, Product.class);
+        product.setUsername(principal.getName());
+        product.setTaxRate(TaxRate.fromRate(productDto.getTaxRate()));
+        return product;
+    }
+
+    private Product obtainStoredProduct(ProductDto productDto) {
+        Product storedProduct = productRepository.findById(productDto.getId())
+                .orElseThrow(getProductNotFoundExceptionSupplier());
+        storedProduct.setTaxRate(TaxRate.fromRate(productDto.getTaxRate()));
+        modelMapper.map(productDto, storedProduct);
+        return storedProduct;
+    }
+
+    private static Comparator<Product> getProductComparator(ProductSortBy sortBy) {
+        return switch (sortBy) {
             case REVENUE -> Comparator.comparingDouble(Product::getRevenue).reversed();
             case UNITS_SOLD -> Comparator.comparingDouble(Product::getUnitsSold).reversed();
             case IN_STOCK -> Comparator.comparingDouble(Product::getInStock).reversed();
             default -> Comparator.comparing(Product::getName);
         };
+    }
 
-        return products.stream()
-                .sorted(comparator)
-                .toList();
+    private static Supplier<ProductNotFoundException> getProductNotFoundExceptionSupplier() {
+        return () -> new ProductNotFoundException("Product not found!");
     }
 
     private List<ProductDto> convertProductsToDtoList(List<Product> products) {

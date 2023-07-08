@@ -27,11 +27,9 @@ import dev.alpey.reliabill.model.dto.UserDto;
 import dev.alpey.reliabill.model.entity.Product;
 import dev.alpey.reliabill.model.entity.Role;
 import dev.alpey.reliabill.model.entity.User;
-import dev.alpey.reliabill.repository.CompanyRepository;
 import dev.alpey.reliabill.repository.ProductRepository;
 import dev.alpey.reliabill.repository.RoleRepository;
 import dev.alpey.reliabill.repository.UserRepository;
-import dev.alpey.reliabill.service.email.EmailService;
 
 @Service
 public class UserService {
@@ -51,12 +49,6 @@ public class UserService {
     @Autowired
     private ProductRepository productRepository;
 
-    @Autowired
-    private CompanyRepository companyRepository;
-
-    @Autowired
-    private EmailService emailService;
-
     @Transactional(readOnly = true)
     public Set<UserDto> searchUsers(String searchTerm) {
         Set<User> results = new HashSet<>();
@@ -71,37 +63,19 @@ public class UserService {
 
     @CachePut(value = "usersByUsername", key = "#userDto.username")
     public UserDto registerUser(UserDto userDto) {
-        if (userRepository.existsByUsername(userDto.getUsername())) {
-            throw new UsernameExistsException("Account with username '" + userDto.getUsername() + "' already exist");
-        }
-        if (userRepository.existsByEmail(userDto.getEmail())) {
-            throw new EmailExistsException("Account with email '" + userDto.getEmail() + "' already exist");
-        }
-        ZoneId belgradeTimeZone = ZoneId.of("Europe/Belgrade");
-        LocalDate currentDate = LocalDate.now(belgradeTimeZone);
+        validateUsername(userDto.getUsername());
+        validateEmail(userDto.getEmail());
         User user = modelMapper.map(userDto, User.class);
-        user.setCreationDate(currentDate);
+        setCreationDate(user);
         encryptUserPassword(user);
         assignDefaultRoleToUser(user);
         User registeredUser = userRepository.save(user);
-        emailService.sendEmailToAdmin("""
-                        Account created
-                        """,
-                """
-                        %s just created an account with a username %s.
-                        Creation date %s.
-                        """.formatted(
-                        registeredUser.getName(),
-                        registeredUser.getUsername(),
-                        registeredUser.getCreationDate()
-                ));
         return convertUserToDto(registeredUser);
     }
 
     @CachePut(value = "usersByUsername", key = "#userDto.username")
     public UserDto updateUser(UserDto userDto) {
-        User currentUser = userRepository.findByUsername(userDto.getUsername())
-                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+        User currentUser = obtainCurrentUser(userDto.getUsername());
         if (!currentUser.getEmail().equals(userDto.getEmail())
                 && userRepository.existsByEmail(userDto.getEmail())) {
             throw new EmailExistsException("Account with email '" + userDto.getEmail() + "' already exist");
@@ -113,8 +87,7 @@ public class UserService {
     }
 
     public UserDto grantAdminRoleToUser(String username) {
-        User currentUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+        User currentUser = obtainCurrentUser(username);
         currentUser.getRoles().add(roleRepository.findByName(RoleName.ADMIN));
         User adminUser = userRepository.save(currentUser);
         return convertUserToDto(adminUser);
@@ -126,14 +99,12 @@ public class UserService {
             @CacheEvict(value = "usersByUsername", key = "#username"),
             @CacheEvict(value = "productsByUser", key = "#username")})
     public void deleteUser(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found!"));
-
+        User currentUser = obtainCurrentUser(username);
         List<Product> usersProducts = productRepository.findByUsername(username);
         if (!usersProducts.isEmpty()) {
             productRepository.deleteAll(usersProducts);
         }
-        userRepository.deleteById(user.getId());
+        userRepository.deleteById(currentUser.getId());
     }
 
     public List<UserDto> loadAllUsers() {
@@ -155,12 +126,22 @@ public class UserService {
                 );
     }
 
-    public UserDto findUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .map(this::convertUserToDto)
-                .orElseThrow(
-                        () -> new UserNotFoundException("User not found!")
-                );
+    private void validateUsername(String username) {
+        if (userRepository.existsByUsername(username)) {
+            throw new UsernameExistsException("Account with username '" + username + "' already exist");
+        }
+    }
+
+    private void validateEmail(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailExistsException("Account with email '" + email + "' already exist");
+        }
+    }
+
+    private void setCreationDate(User user) {
+        ZoneId belgradeTimeZone = ZoneId.of("Europe/Belgrade");
+        LocalDate currentDate = LocalDate.now(belgradeTimeZone);
+        user.setCreationDate(currentDate);
     }
 
     private void encryptUserPassword(User user) {
@@ -170,6 +151,11 @@ public class UserService {
     private void assignDefaultRoleToUser(User user) {
         Role userRole = roleRepository.findByName(RoleName.USER);
         user.setRoles(Collections.singleton(userRole));
+    }
+
+    private User obtainCurrentUser(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
     }
 
     private List<UserDto> convertUsersToDtoList(List<User> users) {

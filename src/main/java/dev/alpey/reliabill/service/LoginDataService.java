@@ -38,7 +38,7 @@ public class LoginDataService {
         if (ownCompany != null) {
             dataMap.put("ownCompany", ownCompany);
         }
-        dataMap.put("companies", companyService.loadAllCompaniesForLoggedUser(principal));
+        dataMap.put("companies", companyService.loadAllCompaniesForCurrentUser(principal));
         dataMap.put("invoices", invoiceService.loadAllInvoicesForLoggedUser(principal));
         dataMap.put("products", productService.loadAllProductsByUsername(username));
         dataMap.put("items", itemService.loadAllItemsForCurrentUser(principal));

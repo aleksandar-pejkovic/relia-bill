@@ -35,7 +35,7 @@ public class CompanyController {
 
     @GetMapping
     public List<CompanyDto> getAllCompaniesForLoggedUser(Principal principal) {
-        return companyService.loadAllCompaniesForLoggedUser(principal);
+        return companyService.loadAllCompaniesForCurrentUser(principal);
     }
 
     @PostMapping("/own")

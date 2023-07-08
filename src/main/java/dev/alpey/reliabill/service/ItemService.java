@@ -3,7 +3,6 @@ package dev.alpey.reliabill.service;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -42,8 +41,7 @@ public class ItemService {
             @CacheEvict(value = "itemsByUser", key = "#principal.getName()")
     })
     public ItemDto createItem(ItemDto itemDto, Principal principal) {
-        Invoice invoice = invoiceRepository.findById(itemDto.getInvoiceId())
-                .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
+        Invoice invoice = obtainInvoice(itemDto.getInvoiceId());
         Item item = modelMapper.map(itemDto, Item.class);
         item.setTaxRate(TaxRate.fromRate(itemDto.getTaxRate()));
         item.calculateTax();
@@ -60,7 +58,7 @@ public class ItemService {
             @CacheEvict(value = "itemsByUser", key = "#principal.getName()")
     })
     public void deleteItem(Long id, Principal principal) {
-        Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("Item not found!"));
+        Item item = obtainItem(id);
         itemRepository.delete(item);
         productService.discardProductSale(item);
 
@@ -70,8 +68,7 @@ public class ItemService {
     }
 
     public ItemDto loadItemById(Long id) {
-        Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Item not found!"));
+        Item item = obtainItem(id);
         return convertItemToDto(item);
     }
 
@@ -84,6 +81,15 @@ public class ItemService {
     public List<ItemDto> loadAllItemsForCurrentUser(Principal principal) {
         List<Item> items = itemRepository.findByUsername(principal.getName());
         return convertItemsToDtoList(items);
+    }
+
+    private Item obtainItem(Long id) {
+        return itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("Item not found!"));
+    }
+
+    private Invoice obtainInvoice(Long invoiceId) {
+        return invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
     }
 
     private List<ItemDto> convertItemsToDtoList(List<Item> items) {

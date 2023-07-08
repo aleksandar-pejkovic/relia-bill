@@ -42,8 +42,7 @@ public class InvoiceService {
 
     @CacheEvict(value = "invoicesByUser", key = "#principal.getName()")
     public InvoiceDto createInvoice(InvoiceDto invoiceDto, Principal principal) {
-        Company company = companyRepository.findById(invoiceDto.getCompanyId())
-                .orElseThrow(() -> new CompanyNotFoundException("Invalid company!"));
+        Company company = obtainClientCompany(invoiceDto.getCompanyId());
         Invoice invoice = modelMapper.map(invoiceDto, Invoice.class);
         invoice.setInvoiceStatus(InvoiceStatus.valueOf(invoiceDto.getInvoiceStatus()));
         invoice.setDocumentType(DocumentType.valueOf(invoiceDto.getDocumentType()));
@@ -55,8 +54,7 @@ public class InvoiceService {
 
     @CacheEvict(value = "invoicesByUser", key = "#principal.getName()")
     public InvoiceDto updateInvoice(InvoiceDto invoiceDto, Principal principal) {
-        Invoice invoice = invoiceRepository.findById(invoiceDto.getId())
-                .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
+        Invoice invoice = obtainInvoice(invoiceDto.getId());
         modelMapper.map(invoiceDto, invoice);
         invoice.setInvoiceStatus(InvoiceStatus.valueOf(invoiceDto.getInvoiceStatus()));
         invoice.setDocumentType(DocumentType.valueOf(invoiceDto.getDocumentType()));
@@ -66,12 +64,8 @@ public class InvoiceService {
 
     @CacheEvict(value = "invoicesByUser", key = "#principal.getName()")
     public void deleteInvoice(Long id, Principal principal) {
-        if (invoiceRepository.existsById(id)) {
-            Invoice invoice = invoiceRepository.findById(id).orElseThrow();
-            invoiceRepository.delete(invoice);
-        } else {
-            throw new InvoiceNotFoundException("Invoice not found!");
-        }
+        Invoice invoice = obtainInvoice(id);
+        invoiceRepository.delete(invoice);
     }
 
     @Cacheable(value = "invoicesByUser", key = "#principal.getName()")
@@ -81,10 +75,19 @@ public class InvoiceService {
     }
 
     public List<InvoiceDto> loadAllInvoicesForCompany(Long companyId) {
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+        Company company = obtainClientCompany(companyId);
         List<Invoice> invoices = invoiceRepository.findByCompany(company);
         return convertInvoicesToDtoList(invoices);
+    }
+
+    private Company obtainClientCompany(Long companyId) {
+        return companyRepository.findById(companyId)
+                .orElseThrow(() -> new CompanyNotFoundException("Company not found!"));
+    }
+
+    private Invoice obtainInvoice(Long invoiceId) {
+        return invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
     }
 
     private List<InvoiceDto> convertInvoicesToDtoList(List<Invoice> invoices) {

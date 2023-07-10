@@ -45,7 +45,7 @@ public class ProductService {
     public ProductDto createProduct(ProductDto productDto, Principal principal) throws PluExistsException {
         Product product = constructProduct(productDto, principal);
         if (productRepository.existsByPluAndUsername(product.getPlu(), principal.getName())) {
-            throw new PluExistsException("A product with the same PLU already exists. Please modify the input accordingly.");
+            throw new PluExistsException("A product with the same PLU already exists.");
         }
         Product savedProduct = productRepository.save(product);
         return convertProductToDto(savedProduct);

@@ -23,18 +23,18 @@ INSERT INTO roles VALUES
 	(2, 'USER');
 
 CREATE TABLE users_roles (
-  id INT(11) NOT NULL AUTO_INCREMENT,
-  user_id INT(11) NOT NULL,
-  role_id INT(11) NOT NULL,
-  PRIMARY KEY (id),
-  CONSTRAINT
-    FOREIGN KEY (user_id)
-    REFERENCES users(id)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT
-    FOREIGN KEY (role_id)
-    REFERENCES roles(id)
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    user_id INT(11) NOT NULL,
+    role_id INT(11) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT
+        FOREIGN KEY (role_id)
+        REFERENCES roles(id)
 );
 
 CREATE TABLE permissions (
@@ -52,16 +52,16 @@ INSERT INTO permissions VALUES
 	(6, 'READ_EVENTS');
 
 CREATE TABLE roles_permissions (
-  id INT(11) NOT NULL AUTO_INCREMENT,
-  role_id INT(11) NOT NULL,
-  permission_id INT(11) NOT NULL,
-  PRIMARY KEY (id),
-  CONSTRAINT
-    FOREIGN KEY (role_id)
-    REFERENCES roles(id),
-  CONSTRAINT
-    FOREIGN KEY (permission_id)
-    REFERENCES permissions(id)
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    role_id INT(11) NOT NULL,
+    permission_id INT(11) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT
+        FOREIGN KEY (role_id)
+        REFERENCES roles(id),
+    CONSTRAINT
+        FOREIGN KEY (permission_id)
+        REFERENCES permissions(id)
   );
 
 INSERT INTO roles_permissions (role_id, permission_id) VALUES
@@ -73,18 +73,21 @@ INSERT INTO roles_permissions (role_id, permission_id) VALUES
     (2, 1);
 
 CREATE TABLE products (
-  id INT(11) NOT NULL AUTO_INCREMENT,
-  plu INT,
-  name VARCHAR(60),
-  unit VARCHAR(5),
-  description VARCHAR(300),
-  tax_rate INT,
-  price DECIMAL(10,2),
-  in_stock DECIMAL(10, 2) DEFAULT 0.0,
-  units_sold DECIMAL(10, 2) DEFAULT 0.0,
-  revenue DECIMAL(10, 2) DEFAULT 0.0,
-  username VARCHAR(60),
-  PRIMARY KEY (id)
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    plu INT NOT NULL,
+    name VARCHAR(60) NOT NULL,
+    unit VARCHAR(5),
+    description VARCHAR(300),
+    tax_rate INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    in_stock DECIMAL(10, 2) DEFAULT 0.0,
+    units_sold DECIMAL(10, 2) DEFAULT 0.0,
+    revenue DECIMAL(10, 2) DEFAULT 0.0,
+    username VARCHAR(60) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT unique_plu_per_user UNIQUE (plu, username),
+    INDEX idx_plu (plu),
+    INDEX idx_name (name)
 );
 
 CREATE TABLE companies (
@@ -107,7 +110,15 @@ CREATE TABLE companies (
         FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE
-        ON UPDATE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT unique_tax_number_per_user UNIQUE (tax_number, user_id),
+    CONSTRAINT unique_registration_number_per_user UNIQUE (registration_number, user_id),
+    CONSTRAINT unique_bank_account_per_user UNIQUE (bank_account, user_id),
+    INDEX idx_name (name),
+    INDEX idx_tax_number (tax_number),
+    INDEX idx_registration_number (registration_number),
+    INDEX idx_bank_account (bank_account),
+    INDEX idx_user_id (user_id)
 );
 
 CREATE TABLE invoices (
@@ -148,28 +159,28 @@ CREATE TABLE items (
 );
 
 CREATE TABLE payments (
-  id INT(11) NOT NULL AUTO_INCREMENT,
-  payment_date DATETIME NOT NULL,
-  amount DOUBLE PRECISION NOT NULL,
-  invoice_id INT(11) NOT NULL,
-  PRIMARY KEY (id),
-  CONSTRAINT
-    FOREIGN KEY (invoice_id)
-    REFERENCES invoices(id)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    payment_date DATETIME NOT NULL,
+    amount DOUBLE PRECISION NOT NULL,
+    invoice_id INT(11) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT
+        FOREIGN KEY (invoice_id)
+        REFERENCES invoices(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE password_reset_token (
-  id INT(11) PRIMARY KEY AUTO_INCREMENT,
-  token VARCHAR(255) NOT NULL,
-  user_id INT(11) NOT NULL,
-  expiry_date DATETIME NOT NULL,
-  CONSTRAINT
-    FOREIGN KEY (user_id)
-    REFERENCES users (id)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
+    id INT(11) PRIMARY KEY AUTO_INCREMENT,
+    token VARCHAR(255) NOT NULL,
+    user_id INT(11) NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    CONSTRAINT
+        FOREIGN KEY (user_id)
+        REFERENCES users (id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 --changeset apejkovic:2

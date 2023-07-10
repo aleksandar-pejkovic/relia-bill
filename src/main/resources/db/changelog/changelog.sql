@@ -241,3 +241,55 @@ INSERT INTO users VALUES
 INSERT INTO users_roles(user_id, role_id) VALUES
     (1, 1),
     (2, 2);
+
+INSERT INTO companies (id, name, director, registration_number, tax_number, bank_account, street, zip, city, phone,
+email, website, vat_status, user_id)
+VALUES (3, 'ABC Company', 'John Doe', '12345678', '987654321', '123-45672-90', 'Main Street', '12345', 'New York',
+'123-456-7890', 'info@abccompany.com', 'www.abccompany.com', true, 2);
+
+INSERT INTO companies (id, name, director, registration_number, tax_number, bank_account, street, zip, city, phone, email, website, vat_status, user_id)
+VALUES (4, 'XYZ Corporation', 'Jane Smith', '87624321', '123451789', '198-26543-21', 'First Avenue', '54321', 'Los
+Angeles',
+ '987-654-3210', 'info@xyzcorp.com', 'www.xyzcorp.com', false, 2);
+
+INSERT INTO companies (id, name, director, registration_number, tax_number, bank_account, street, zip, city, phone, email, website, vat_status, user_id)
+VALUES (5, '123 Industries', 'Mike Johnson', '45628901', '947154321', '123-22678-90', 'Oak Street', '67890', 'Chicago',
+'789-012-3456', 'info@123industries.com', 'www.123industries.com', true, 2);
+
+INSERT INTO companies (id, name, director, registration_number, tax_number, bank_account, street, zip, city, phone, email, website, vat_status, user_id)
+VALUES (6, 'ABC Company', 'Sarah Wilson', '78201234', '123456789', '109-8226543-21', 'Maple Avenue', '23456',
+'San Francisco', '012-345-6789', 'info@abccompany.com', 'www.abccompany.com', false, 2);
+
+INSERT INTO companies (id, name, director, registration_number, tax_number, bank_account, street, zip, city, phone, email, website, vat_status, user_id)
+VALUES (7, 'XTR Corporation', 'David Lee', '56729012', '984624321', '123-421278-90', 'Cedar Street', '34567', 'Seattle',
+'234-567-8901', 'info@xyzcorp.com', 'www.xyzcorp.com', true, 2);
+
+INSERT INTO invoices (document_type, invoice_number, creation_date, due_date, invoice_status, total, company_id)
+VALUES ('INVOICE', '2023-001', '2023-01-15', '2023-02-15', 'PENDING', 0.00, 3);
+
+INSERT INTO invoices (document_type, invoice_number, creation_date, due_date, invoice_status, total, company_id)
+VALUES ('INVOICE', '2023-002', '2023-02-05', '2023-03-05', 'PENDING', 0.00, 4);
+
+INSERT INTO invoices (document_type, invoice_number, creation_date, due_date, invoice_status, total, company_id)
+VALUES ('INVOICE', '2023-003', '2023-03-12', '2023-04-12', 'PENDING', 0.00, 5);
+
+INSERT INTO invoices (document_type, invoice_number, creation_date, due_date, invoice_status, total, company_id)
+VALUES ('INVOICE', '2023-004', '2023-04-08', '2023-05-08', 'PENDING', 0.00, 6);
+
+INSERT INTO invoices (document_type, invoice_number, creation_date, due_date, invoice_status, total, company_id)
+VALUES ('INVOICE', '2023-005', '2023-05-18', '2023-06-18', 'PENDING', 0.00, 7);
+
+INSERT INTO invoices (document_type, invoice_number, creation_date, due_date, invoice_status, total, company_id)
+VALUES ('INVOICE', '2023-006', '2023-01-10', '2023-02-10', 'PENDING', 0.00, 3);
+
+INSERT INTO invoices (document_type, invoice_number, creation_date, due_date, invoice_status, total, company_id)
+VALUES ('INVOICE', '2023-007', '2023-02-20', '2023-03-20', 'PENDING', 0.00, 4);
+
+INSERT INTO invoices (document_type, invoice_number, creation_date, due_date, invoice_status, total, company_id)
+VALUES ('INVOICE', '2023-008', '2023-03-25', '2023-04-25', 'PENDING', 0.00, 5);
+
+INSERT INTO invoices (document_type, invoice_number, creation_date, due_date, invoice_status, total, company_id)
+VALUES ('INVOICE', '2023-009', '2023-04-16', '2023-05-16', 'PENDING', 0.00, 6);
+
+INSERT INTO invoices (document_type, invoice_number, creation_date, due_date, invoice_status, total, company_id)
+VALUES ('INVOICE', '2023-010', '2023-05-28', '2023-06-28', 'PENDING', 0.00, 7);

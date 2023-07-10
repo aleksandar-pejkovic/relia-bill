@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.alpey.reliabill.configuration.exceptions.product.PluExistsException;
 import dev.alpey.reliabill.model.dto.ProductDto;
 import dev.alpey.reliabill.service.ProductService;
 import jakarta.validation.Valid;
@@ -33,9 +34,13 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto productDto, Principal principal) {
-        ProductDto productResponse = productService.createProduct(productDto, principal);
-        return new ResponseEntity<>(productResponse, HttpStatus.CREATED);
+    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductDto productDto, Principal principal) {
+        try {
+            ProductDto productResponse = productService.createProduct(productDto, principal);
+            return ResponseEntity.ok(productResponse);
+        } catch (PluExistsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping

@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import dev.alpey.reliabill.configuration.exceptions.product.PluExistsException;
 import dev.alpey.reliabill.configuration.exceptions.product.ProductNotFoundException;
 import dev.alpey.reliabill.enums.ProductSortBy;
 import dev.alpey.reliabill.enums.TaxRate;
@@ -41,8 +42,11 @@ public class ProductService {
     }
 
     @CacheEvict(value = "productsByUser", key = "#principal.getName()")
-    public ProductDto createProduct(ProductDto productDto, Principal principal) {
+    public ProductDto createProduct(ProductDto productDto, Principal principal) throws PluExistsException {
         Product product = constructProduct(productDto, principal);
+        if (productRepository.existsByPluAndUsername(product.getPlu(), principal.getName())) {
+            throw new PluExistsException("A product with the same PLU already exists. Please modify the input accordingly.");
+        }
         Product savedProduct = productRepository.save(product);
         return convertProductToDto(savedProduct);
     }

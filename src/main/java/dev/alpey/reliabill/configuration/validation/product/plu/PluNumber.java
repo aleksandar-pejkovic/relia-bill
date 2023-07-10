@@ -15,7 +15,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PluNumber {
 
-    String message() default "Plu must be between 1 and 9999!";
+    String message() default "Plu must be between 1 and 99999!";
 
     Class<?>[] groups() default {};
 

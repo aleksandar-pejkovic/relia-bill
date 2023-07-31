@@ -68,4 +68,26 @@ public class Invoice {
     public void decreaseTotal(Double amount) {
         this.total -= amount;
     }
+
+    public void mapDocumentType(String documentTypeString) {
+        if (documentTypeString.equalsIgnoreCase("Faktura")) {
+            this.documentType = DocumentType.INVOICE;
+        } else if (documentTypeString.equalsIgnoreCase("Profaktura")) {
+            this.documentType = DocumentType.ESTIMATE;
+        } else {
+            this.documentType = null;
+        }
+    }
+
+    public void mapInvoiceStatus(String invoiceStatusString) {
+        if (invoiceStatusString.equalsIgnoreCase("Neizmireno")) {
+            this.invoiceStatus = InvoiceStatus.PENDING;
+        } else if (invoiceStatusString.equalsIgnoreCase("Delimično izmireno")) {
+            this.invoiceStatus = InvoiceStatus.PARTIALLY_PAID;
+        } else if (invoiceStatusString.equalsIgnoreCase("Plaćeno")) {
+            this.invoiceStatus = InvoiceStatus.PAID;
+        } else {
+            this.invoiceStatus = null;
+        }
+    }
 }

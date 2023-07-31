@@ -16,11 +16,11 @@ public enum DocumentType {
     }
 
     public static boolean isValidDocumentType(String type) {
-        try {
-            DocumentType.valueOf(type);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
+        for (DocumentType documentType : DocumentType.values()) {
+            if (documentType.getType().equals(type)) {
+                return true;
+            }
         }
+        return false;
     }
 }

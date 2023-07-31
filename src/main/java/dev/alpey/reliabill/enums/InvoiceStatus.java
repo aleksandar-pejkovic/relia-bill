@@ -2,9 +2,9 @@ package dev.alpey.reliabill.enums;
 
 public enum InvoiceStatus {
 
-    PENDING("Pending"),
-    PARTIALLY_PAID("Partially paid"),
-    PAID("Paid");
+    PENDING("Neizmireno"),
+    PARTIALLY_PAID("Delimično izmireno"),
+    PAID("Plaćeno");
 
     private final String status;
 
@@ -17,11 +17,11 @@ public enum InvoiceStatus {
     }
 
     public static boolean isValidInvoiceStatus(String status) {
-        try {
-            InvoiceStatus.valueOf(status);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
+        for (InvoiceStatus invoiceStatus : InvoiceStatus.values()) {
+            if (invoiceStatus.getType().equals(status)) {
+                return true;
+            }
         }
+        return false;
     }
 }

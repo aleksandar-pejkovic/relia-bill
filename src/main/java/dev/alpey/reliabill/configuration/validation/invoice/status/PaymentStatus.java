@@ -15,7 +15,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PaymentStatus {
 
-    String message() default "Invalid status! Valid status: [PENDING, PARTIALY_PAID, PAID]";
+    String message() default "Invalid status! Valid status: [Neizmireno, Delimično izmireno, Plaćeno]";
 
     Class<?>[] groups() default {};
 

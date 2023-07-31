@@ -15,7 +15,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DocumentType {
 
-    String message() default "Invalid type! Valid types: [INVOICE, ESTIMATE]";
+    String message() default "Invalid type! Valid types: [Faktura, Profaktura]";
 
     Class<?>[] groups() default {};
 

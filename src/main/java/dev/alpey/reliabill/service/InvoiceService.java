@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.company.CompanyNotFoundException;
 import dev.alpey.reliabill.configuration.exceptions.invoice.InvoiceNotFoundException;
-import dev.alpey.reliabill.enums.DocumentType;
-import dev.alpey.reliabill.enums.InvoiceStatus;
 import dev.alpey.reliabill.model.dto.InvoiceDto;
 import dev.alpey.reliabill.model.entity.Company;
 import dev.alpey.reliabill.model.entity.Invoice;
@@ -44,8 +42,8 @@ public class InvoiceService {
     public InvoiceDto createInvoice(InvoiceDto invoiceDto, Principal principal) {
         Company company = obtainClientCompany(invoiceDto.getCompanyId());
         Invoice invoice = modelMapper.map(invoiceDto, Invoice.class);
-        invoice.setInvoiceStatus(InvoiceStatus.valueOf(invoiceDto.getInvoiceStatus()));
-        invoice.setDocumentType(DocumentType.valueOf(invoiceDto.getDocumentType()));
+        invoice.mapInvoiceStatus(invoiceDto.getInvoiceStatus());
+        invoice.mapDocumentType(invoiceDto.getDocumentType());
         invoice.setCompany(company);
         invoice.setTotal(0.0);
         Invoice savedInvoice = invoiceRepository.save(invoice);
@@ -56,8 +54,8 @@ public class InvoiceService {
     public InvoiceDto updateInvoice(InvoiceDto invoiceDto, Principal principal) {
         Invoice invoice = obtainInvoice(invoiceDto.getId());
         modelMapper.map(invoiceDto, invoice);
-        invoice.setInvoiceStatus(InvoiceStatus.valueOf(invoiceDto.getInvoiceStatus()));
-        invoice.setDocumentType(DocumentType.valueOf(invoiceDto.getDocumentType()));
+        invoice.mapInvoiceStatus(invoiceDto.getInvoiceStatus());
+        invoice.mapDocumentType(invoiceDto.getDocumentType());
         Invoice updatedInvoice = invoiceRepository.save(invoice);
         return convertInvoiceToDto(updatedInvoice);
     }
@@ -101,8 +99,8 @@ public class InvoiceService {
 
     private InvoiceDto convertInvoiceToDto(Invoice invoice) {
         InvoiceDto invoiceDto = modelMapper.map(invoice, InvoiceDto.class);
-        invoiceDto.setInvoiceStatus(invoice.getInvoiceStatus().name());
-        invoiceDto.setDocumentType(invoice.getDocumentType().name());
+        invoiceDto.setInvoiceStatus(invoice.getInvoiceStatus().getType());
+        invoiceDto.setDocumentType(invoice.getDocumentType().getType());
         invoiceDto.setCompanyName(invoice.getCompany().getName());
         invoiceDto.setCompanyId(invoice.getCompany().getId());
         return invoiceDto;

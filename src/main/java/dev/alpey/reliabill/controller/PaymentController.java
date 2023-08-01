@@ -1,5 +1,6 @@
 package dev.alpey.reliabill.controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,8 @@ public class PaymentController {
     private PaymentService paymentService;
 
     @PostMapping
-    public ResponseEntity<PaymentDto> createPayment(@Valid @RequestBody PaymentDto paymentDto) {
-        PaymentDto createdPayment = paymentService.createPayment(paymentDto);
+    public ResponseEntity<PaymentDto> createPayment(@Valid @RequestBody PaymentDto paymentDto, Principal principal) {
+        PaymentDto createdPayment = paymentService.createPayment(paymentDto, principal);
         return new ResponseEntity<>(createdPayment, HttpStatus.CREATED);
     }
 
@@ -46,8 +47,8 @@ public class PaymentController {
     }
 
     @DeleteMapping("/{paymentId}")
-    public String deletePayment(@PathVariable Long paymentId) {
-        paymentService.deletePayment(paymentId);
+    public String deletePayment(@PathVariable Long paymentId, Principal principal) {
+        paymentService.deletePayment(paymentId, principal);
         return "Payment deleted!";
     }
 }

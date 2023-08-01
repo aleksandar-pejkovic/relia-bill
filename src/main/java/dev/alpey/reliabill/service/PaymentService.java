@@ -1,13 +1,14 @@
 package dev.alpey.reliabill.service;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import dev.alpey.reliabill.configuration.exceptions.invoice.InvoiceNotFoundException;
@@ -35,11 +36,13 @@ public class PaymentService {
     @Autowired
     private CompanyRepository companyRepository;
 
-    public PaymentDto createPayment(PaymentDto paymentDto) {
+    @CacheEvict(value = "invoicesByUser", key = "#principal.getName()")
+    public PaymentDto createPayment(PaymentDto paymentDto, Principal principal) {
         Payment payment = modelMapper.map(paymentDto, Payment.class);
         Invoice invoice = invoiceRepository.findById(paymentDto.getInvoiceId())
                 .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
-        InvoiceStatus invoiceStatus = checkInvoiceStatus(invoice, payment);
+        double totalPayments = calculatePaymentsAmountByInvoice(invoice.getId()) + payment.getAmount();
+        InvoiceStatus invoiceStatus = obtainInvoiceStatus(totalPayments, invoice.getTotal());
         invoice.setInvoiceStatus(invoiceStatus);
         payment.setInvoice(invoice);
         payment.setPaymentDate(LocalDateTime.now());
@@ -47,11 +50,26 @@ public class PaymentService {
         return convertPaymentToDto(savedPayment);
     }
 
-    private InvoiceStatus checkInvoiceStatus(Invoice invoice, Payment payment) {
-        if (payment.getAmount() >= invoice.getTotal()) {
+    @CacheEvict(value = "invoicesByUser", key = "#principal.getName()")
+    public void deletePayment(Long paymentId, Principal principal) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow();
+        paymentRepository.delete(payment);
+        Invoice invoice = invoiceRepository.findById(payment.getInvoice().getId())
+                .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found!"));
+        double totalPayments = calculatePaymentsAmountByInvoice(invoice.getId());
+        InvoiceStatus invoiceStatus = obtainInvoiceStatus(totalPayments, invoice.getTotal());
+        invoice.setInvoiceStatus(invoiceStatus);
+        invoiceRepository.save(invoice);
+    }
+
+    private InvoiceStatus obtainInvoiceStatus(double totalPayments, double invoiceTotal) {
+        if (totalPayments >= invoiceTotal) {
             return InvoiceStatus.PAID;
-        } else {
+        } else if (totalPayments > 0.0) {
             return InvoiceStatus.PARTIALLY_PAID;
+        } else {
+            return InvoiceStatus.PENDING;
         }
     }
 
@@ -91,12 +109,11 @@ public class PaymentService {
                 .sum();
     }
 
-    public void deletePayment(Long paymentId) {
-        if (paymentRepository.existsById(paymentId)) {
-            paymentRepository.deleteById(paymentId);
-        } else {
-            throw new NoSuchElementException("Payment not found!");
-        }
+    private double calculatePaymentsAmountByInvoice(Long invoiceId) {
+        List<Payment> payments = paymentRepository.findByInvoiceId(invoiceId);
+        return payments.stream()
+                .mapToDouble(Payment::getAmount)
+                .sum();
     }
 
     private PaymentDto convertPaymentToDto(Payment payment) {

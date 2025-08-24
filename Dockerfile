@@ -1,5 +1,6 @@
 # Use the official Maven image as the base image
-FROM maven:3.8.4-openjdk-17 AS builder
+ARG JAVA_VERSION=17
+FROM maven:3.8.4-openjdk-${JAVA_VERSION} AS builder
 
 # Set the working directory in the container
 WORKDIR /app
@@ -20,7 +21,7 @@ COPY checkstyle.xml .
 RUN mvn package -DskipTests
 
 # Create a new image with the JAR file
-FROM openjdk:17-jdk-alpine
+FROM openjdk:${JAVA_VERSION}-jdk
 
 # Set the working directory in the container
 WORKDIR /app

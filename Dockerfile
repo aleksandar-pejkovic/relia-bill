@@ -1,5 +1,5 @@
 # Use the official Maven image as the base image
-ARG JAVA_VERSION=17
+ARG JAVA_VERSION=24
 FROM maven:3.8.4-openjdk-${JAVA_VERSION} AS builder
 
 # Set the working directory in the container
